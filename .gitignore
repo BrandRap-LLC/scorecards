@@ -2,6 +2,7 @@
 node_modules/
 /node_modules
 /node_modules/*
+/Users/haris/Desktop/projects/scorecards/node_modules/next
 
 # Production
 build/
