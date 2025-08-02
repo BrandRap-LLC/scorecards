@@ -6,14 +6,22 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sync": "node scripts/sync-mssql-to-supabase.js",
+    "setup-db": "echo 'Please run the SQL script in sql/setup_supabase_tables.sql in your Supabase SQL editor'",
+    "db:check": "node scripts/execute-supabase-sql.js check",
+    "db:reset": "node scripts/execute-supabase-sql.js reset",
+    "db:setup": "node scripts/execute-supabase-sql.js setup",
+    "setup:full": "./scripts/setup-and-sync.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0",
     "@tanstack/react-query": "^5.84.0",
     "chart.js": "^4.5.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^16.4.5",
     "lucide-react": "^0.535.0",
+    "mssql": "^11.0.1",
     "next": "15.4.5",
     "react": "19.1.0",
     "react-chartjs-2": "^5.3.0",
