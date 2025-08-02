@@ -1,58 +1,81 @@
-# Weekly Scorecards Dashboard
+# Executive Dashboard Platform
 
-A weekly performance metrics dashboard for tracking clinic operations across multiple companies.
+A comprehensive analytics dashboard for tracking clinic performance metrics across multiple companies, powered by monthly executive reports data.
 
 ## Features
 
-- **Weekly Metrics Display**: View current week's performance metrics for all companies
-- **12-Week Grid View**: Historical data view showing the last 12 weeks of metrics
-- **MTD Indicators**: Clear marking of month-to-date (incomplete) week data
-- **Week-over-Week Analysis**: Automatic WoW percentage calculations and trend indicators
-- **Company Filtering**: Filter views by individual companies
-- **CSV Export**: Export data from both homepage and grid views
-- **Mobile Responsive**: Fully responsive design with hamburger menu for mobile
+- **Company Overview Dashboards**: Comprehensive performance metrics for each clinic
+- **Traffic Source Analysis**: Detailed breakdown by marketing channel
+- **Marketing Funnel Visualization**: Track conversion through each stage
+- **Cost Efficiency Metrics**: ROI, ROAS, CAC analysis
+- **Customer Journey Analytics**: New vs returning patient insights
+- **Interactive Charts**: Dynamic visualizations with drill-down capabilities
+- **Mobile Responsive**: Fully responsive design optimized for all devices
 
 ## Data Architecture
 
-### MSSQL Source
-- Table: `executive_report_new_week`
-- Contains weekly metrics for all companies
-- Excludes conversation-related columns
+### Primary Data Source
+**Table**: `executive_monthly_reports` (Supabase)
+- **Records**: 572 (December 2024 data)
+- **Companies**: 11 clinics
+- **Traffic Sources**: 8 marketing channels
+- **Metrics**: 21 performance indicators
 
-### Supabase Tables
-- `companies`: Company definitions
-- `scorecards_metrics`: Metric definitions and categories
-- `scorecards_weekly`: Weekly metric values with WoW calculations
-- `latest_scorecards`: View for current week data
-- `scorecards_12week_history`: View for 12-week historical data
+### Key Metrics Available
+- **Marketing**: impressions, visits, spend
+- **Lead Generation**: leads, conversion_rate
+- **Customer Acquisition**: cac_total, cac_new
+- **Appointments**: total_appointments, new_appointments, returning_appointments, online_booking
+- **Engagement**: total_conversations, new_conversations, returning_conversations  
+- **Revenue**: ltv, estimated_ltv_6m, avg_ltv, roas
 
-## Pages
+### Data Dimensions
+- **Clinic**: Individual clinic/company identifier
+- **Month**: Report period (currently December 2024)
+- **Traffic Source**: Marketing channel (google ads, local seo, organic, social, etc.)
 
-### Homepage (`/`)
-- Displays current week's metrics grouped by company and category
-- Shows WoW change indicators
-- MTD badge for incomplete weeks
-- Company filter tabs
-- CSV export functionality
+## Planned Pages
 
-### Grid View (`/grid`)
-- 12-week historical view for all companies
-- Expandable company sections
-- Week headers (W1-W52)
-- MTD indicators with warning icons
-- Color-coded current week column
+### Company Dashboard (`/dashboard/[company]`)
+- Comprehensive overview for each clinic
+- KPI summary cards
+- Traffic source performance table
+- Marketing funnel visualization
+- Cost analysis charts
+- Customer journey metrics
 
-### Data Quality (`/data-quality`)
-- Monitor data sync status
-- View data completeness metrics
-- Check sync history
+### Comparison View (`/compare`)
+- Multi-company performance comparison
+- Benchmarking against averages
+- Best/worst performer identification
 
-## Metric Categories
+### Analytics (`/analytics`)
+- Deep dive into specific metrics
+- Custom date range selection (when more data available)
+- Advanced filtering and segmentation
 
-- **Revenue**: Net Sales, Gross Sales, Service Revenue, Product Revenue
-- **Customer**: New Customers, Returning Customers, Retention Rate
-- **Operations**: Appointments, Show Rate, Utilization, Average Ticket
-- **Marketing**: Leads, Conversion Rate, Cost per Lead, ROI
+## Dashboard Components (Planned)
+
+### Summary Cards
+- Total Spend
+- Total Leads
+- Total Appointments
+- Overall Conversion Rate
+- Average ROAS
+
+### Visualizations
+- Traffic Source Performance Grid
+- Marketing Funnel Chart
+- Spend Distribution Pie Chart
+- Cost Efficiency Scatter Plot
+- New vs Returning Stacked Bars
+- LTV Analysis Charts
+
+### Analytics Features
+- Sortable/filterable tables
+- Interactive tooltips
+- Drill-down capabilities
+- Export to CSV/PDF
 
 ## Development
 
@@ -73,8 +96,30 @@ npm start
 ## Environment Variables
 
 ```env
+# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# MSSQL Configuration (for data sync)
+MSSQL_SERVER=server_address
+MSSQL_PORT=1433
+MSSQL_DATABASE=database_name
+MSSQL_USERNAME=username
+MSSQL_PASSWORD=password
+```
+
+## Data Migration & Sync
+
+### Weekly Data Sync
+```bash
+npm run sync                 # Sync weekly data from MSSQL to Supabase
+```
+
+### Monthly Data Migration
+```bash
+npm run sync:monthly         # Migrate monthly executive reports
+node scripts/check-tables.js # Check table status in Supabase
 ```
 
 ## Deployment
