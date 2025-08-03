@@ -203,18 +203,18 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
   ]
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Performance Metrics Grid</CardTitle>
+    <Card className="shadow-lg">
+      <CardHeader className="bg-gray-50 border-b">
+        <CardTitle className="text-gray-900">Performance Metrics Grid</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b-2">
-                <th className="text-left p-2 min-w-[200px]">Metric</th>
+              <tr className="border-b-2 border-gray-200">
+                <th className="text-left p-2 min-w-[200px] text-gray-700 font-semibold">Metric</th>
                 {months.map(month => (
-                  <th key={month} className="text-right p-2 min-w-[100px]">
+                  <th key={month} className="text-right p-2 min-w-[100px] text-gray-700 font-semibold">
                     {formatMonth(month)}
                   </th>
                 ))}
@@ -223,16 +223,16 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
             <tbody>
               {metricGroups.map((group, groupIndex) => (
                 <React.Fragment key={groupIndex}>
-                  <tr className="bg-gray-50">
-                    <td colSpan={months.length + 1} className="p-2 font-semibold text-sm text-gray-600">
+                  <tr className="bg-gray-100">
+                    <td colSpan={months.length + 1} className="p-2 font-semibold text-sm text-gray-700">
                       {group.title}
                     </td>
                   </tr>
                   {group.metrics.map((metric, metricIndex) => (
-                    <tr key={`${groupIndex}-${metricIndex}`} className="border-b hover:bg-gray-50">
-                      <td className="p-2 text-sm">{metric.label}</td>
+                    <tr key={`${groupIndex}-${metricIndex}`} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="p-2 text-sm text-gray-800">{metric.label}</td>
                       {months.map(month => (
-                        <td key={month} className="text-right p-2 text-sm">
+                        <td key={month} className="text-right p-2 text-sm text-gray-900 font-medium">
                           {formatValue(metric.key, monthlyData[month]?.[metric.key] || 0)}
                         </td>
                       ))}

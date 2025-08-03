@@ -85,10 +85,10 @@ export default function MarketingDashboardList() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Marketing Performance Dashboards
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-700">
             Select a company to view their marketing channel performance
           </p>
-          <div className="mt-4 inline-flex items-center text-sm text-gray-500">
+          <div className="mt-4 inline-flex items-center text-sm text-gray-600">
             <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
             {companies.length} companies with data available
           </div>
@@ -101,9 +101,9 @@ export default function MarketingDashboardList() {
               href={`/marketing/${company.id}`}
               className="block"
             >
-              <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer h-full">
+              <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer h-full bg-white">
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
+                  <CardTitle className="flex items-center justify-between text-gray-900">
                     <span>{company.name}</span>
                     <ArrowRight className="h-5 w-5 text-gray-400" />
                   </CardTitle>
@@ -112,8 +112,8 @@ export default function MarketingDashboardList() {
                   <p className="text-sm text-gray-600">
                     {company.id}
                   </p>
-                  <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
-                    <span>{company.recordCount} data points</span>
+                  <div className="mt-4 flex items-center justify-between text-xs">
+                    <span className="text-gray-600">{company.recordCount} data points</span>
                     <span className="text-green-600 font-semibold">Active</span>
                   </div>
                 </CardContent>
@@ -123,10 +123,10 @@ export default function MarketingDashboardList() {
         </div>
 
         <div className="mt-12 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-600">
             Data sourced from executive_monthly_reports table
           </p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-600 mt-1">
             Showing last 5 months with month-over-month comparisons
           </p>
         </div>
