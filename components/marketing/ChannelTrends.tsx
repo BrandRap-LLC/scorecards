@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface ChannelTrendsProps {
   data: any[]
+  startDate?: string
+  endDate?: string
 }
 
 const CHANNEL_COLORS: Record<string, string> = {

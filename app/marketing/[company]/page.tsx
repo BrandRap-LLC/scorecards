@@ -4,9 +4,7 @@ import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Calendar, Download, TrendingUp, TrendingDown } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import KPICards from '@/components/marketing/KPICards'
 import ChannelMixCharts from '@/components/marketing/ChannelMixCharts'
 import PerformanceMatrix from '@/components/marketing/PerformanceMatrix'
@@ -14,14 +12,15 @@ import ChannelTrends from '@/components/marketing/ChannelTrends'
 import ChannelTable from '@/components/marketing/ChannelTable'
 import FunnelAnalysis from '@/components/marketing/FunnelAnalysis'
 import CostEfficiency from '@/components/marketing/CostEfficiency'
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns'
+import MonthlyComparison from '@/components/marketing/MonthlyComparison'
+import { format, subMonths } from 'date-fns'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// Company list
+// Company list - actual companies from database
 const COMPANIES = [
   'advancedlifeclinic.com',
   'alluraderm.com',
@@ -29,11 +28,11 @@ const COMPANIES = [
   'drridha.com',
   'genesis-medspa.com',
   'greenspringaesthetics.com',
-  'medicalagecenter.com',
-  'parkhillclinic.com',
+  'kovakcosmeticcenter.com',
+  'mirabilemd.com',
+  'myskintastic.com',
   'skincareinstitute.net',
-  'skinjectables.com',
-  'youthful-image.com'
+  'skinjectables.com'
 ]
 
 export default function MarketingDashboard() {
@@ -42,11 +41,11 @@ export default function MarketingDashboard() {
   
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any>(null)
-  const [dateRange, setDateRange] = useState({
-    start: '2024-12-01',
-    end: '2025-08-31'
-  })
-  const [viewMode, setViewMode] = useState<'monthly' | 'quarterly'>('monthly')
+  const [monthlyData, setMonthlyData] = useState<any>(null)
+
+  // Get last 5 months of data
+  const endDate = new Date('2025-08-31') // Latest data point
+  const startDate = subMonths(endDate, 4) // 5 months total
 
   // Validate company
   useEffect(() => {
@@ -58,23 +57,35 @@ export default function MarketingDashboard() {
   // Fetch data
   useEffect(() => {
     fetchDashboardData()
-  }, [company, dateRange])
+  }, [company])
 
   const fetchDashboardData = async () => {
     setLoading(true)
     try {
-      // Fetch channel performance summary
+      // Fetch last 5 months of data
       const { data: channelData, error: channelError } = await supabase
         .from('executive_monthly_reports')
         .select('*')
         .eq('clinic', company)
-        .gte('month', dateRange.start)
-        .lte('month', dateRange.end)
+        .gte('month', format(startDate, 'yyyy-MM-dd'))
+        .lte('month', format(endDate, 'yyyy-MM-dd'))
+        .order('month', { ascending: true })
       
       if (channelError) throw channelError
 
-      // Process and aggregate data
-      const processedData = processChannelData(channelData || [])
+      // Process monthly comparisons
+      const monthlyComparisons = processMonthlyData(channelData || [])
+      setMonthlyData(monthlyComparisons)
+
+      // Process overall data for current month
+      const currentMonthData = channelData?.filter(
+        d => d.month.startsWith('2025-08')
+      ) || []
+      
+      // Process data with all months for trends but focus on current month for other metrics
+      const processedData = processChannelData(currentMonthData)
+      // Add all raw data for trend charts
+      processedData.rawData = channelData || []
       setData(processedData)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -83,8 +94,91 @@ export default function MarketingDashboard() {
     }
   }
 
+  const processMonthlyData = (rawData: any[]) => {
+    // Group by month
+    const monthlyGroups = rawData.reduce((acc, row) => {
+      const month = row.month.substring(0, 7) // YYYY-MM format
+      if (!acc[month]) {
+        acc[month] = []
+      }
+      acc[month].push(row)
+      return acc
+    }, {} as Record<string, any[]>)
+
+    // Calculate monthly totals - using the existing calculated columns from database
+    const monthlyTotals = Object.entries(monthlyGroups).map(([month, data]) => {
+      const totals = data.reduce((acc, row) => ({
+        spend: acc.spend + (row.spend || 0),
+        leads: acc.leads + (row.leads || 0),
+        visits: acc.visits + (row.visits || 0),
+        impressions: acc.impressions + (row.impressions || 0),
+        appointments: acc.appointments + (row.total_appointments || 0),
+        revenue: acc.revenue + (row.total_estimated_revenue || 0),
+        roasSum: acc.roasSum + (row.total_roas || 0),
+        conversionSum: acc.conversionSum + (row.total_conversion || 0),
+        cacSum: acc.cacSum + (row.cac_total || 0),
+        count: acc.count + 1
+      }), {
+        spend: 0,
+        leads: 0,
+        visits: 0,
+        impressions: 0,
+        appointments: 0,
+        revenue: 0,
+        roasSum: 0,
+        conversionSum: 0,
+        cacSum: 0,
+        count: 0
+      })
+
+      return {
+        month,
+        spend: totals.spend,
+        leads: totals.leads,
+        visits: totals.visits,
+        impressions: totals.impressions,
+        appointments: totals.appointments,
+        revenue: totals.revenue,
+        avgROAS: totals.count > 0 ? totals.roasSum / totals.count : 0, // Use average of total_roas from DB
+        avgConversion: totals.count > 0 ? totals.conversionSum / totals.count : 0, // Use average of total_conversion from DB
+        avgCAC: totals.count > 0 ? totals.cacSum / totals.count : 0 // Use average of cac_total from DB
+      }
+    })
+
+    // Calculate month-over-month changes
+    return monthlyTotals.map((month, index) => {
+      if (index === 0) {
+        return { ...month, changes: {} }
+      }
+      
+      const prevMonth = monthlyTotals[index - 1]
+      return {
+        ...month,
+        changes: {
+          spend: calculateChange(prevMonth.spend, month.spend),
+          leads: calculateChange(prevMonth.leads, month.leads),
+          roas: calculateChange(prevMonth.avgROAS, month.avgROAS),
+          conversion: calculateChange(prevMonth.avgConversion, month.avgConversion),
+          cac: calculateChange(prevMonth.avgCAC, month.avgCAC, true), // Inverse for CAC
+          revenue: calculateChange(prevMonth.revenue, month.revenue)
+        }
+      }
+    })
+  }
+
+  const calculateChange = (oldVal: number, newVal: number, inverse = false) => {
+    if (oldVal === 0 && newVal === 0) return { value: 0, percent: 0 }
+    if (oldVal === 0) return { value: newVal, percent: 100 }
+    const change = newVal - oldVal
+    const percent = (change / oldVal) * 100
+    return {
+      value: change,
+      percent: inverse ? -percent : percent // Inverse for metrics where lower is better
+    }
+  }
+
   const processChannelData = (rawData: any[]) => {
-    // Group by traffic source
+    // Group by traffic source for current month
     const byChannel = rawData.reduce((acc, row) => {
       const channel = row.traffic_source
       if (!acc[channel]) {
@@ -96,10 +190,11 @@ export default function MarketingDashboard() {
           leads: 0,
           appointments: 0,
           conversations: 0,
+          revenue: 0,
           roasSum: 0,
           conversionSum: 0,
-          count: 0,
-          months: []
+          cacSum: 0,
+          count: 0
         }
       }
       
@@ -109,60 +204,65 @@ export default function MarketingDashboard() {
       acc[channel].leads += row.leads || 0
       acc[channel].appointments += row.total_appointments || 0
       acc[channel].conversations += row.total_conversations || 0
-      acc[channel].roasSum += row.total_roas || row.roas || 0
-      acc[channel].conversionSum += row.total_conversion || row.conversion_rate || 0
+      acc[channel].revenue += row.total_estimated_revenue || 0
+      acc[channel].roasSum += row.total_roas || 0
+      acc[channel].conversionSum += row.total_conversion || 0
+      acc[channel].cacSum += row.cac_total || 0
       acc[channel].count += 1
-      acc[channel].months.push({
-        month: row.month,
-        spend: row.spend,
-        leads: row.leads,
-        roas: row.total_roas || row.roas,
-        conversion: row.total_conversion || row.conversion_rate
-      })
       
       return acc
     }, {} as Record<string, any>)
 
-    // Calculate averages and derived metrics
+    // Use the pre-calculated metrics from database
     const channels = Object.values(byChannel).map((ch: any) => ({
       ...ch,
-      avg_roas: ch.count > 0 ? ch.roasSum / ch.count : 0,
-      avg_conversion: ch.count > 0 ? ch.conversionSum / ch.count : 0,
-      cac: ch.leads > 0 ? ch.spend / ch.leads : 0,
+      avg_roas: ch.count > 0 ? ch.roasSum / ch.count : 0, // Use average of total_roas
+      avg_conversion: ch.count > 0 ? ch.conversionSum / ch.count : 0, // Use average of total_conversion
+      cac: ch.count > 0 ? ch.cacSum / ch.count : 0, // Use average of cac_total
       appointment_rate: ch.leads > 0 ? (ch.appointments / ch.leads) * 100 : 0,
       cost_per_visit: ch.visits > 0 ? ch.spend / ch.visits : 0,
       visit_to_lead: ch.visits > 0 ? (ch.leads / ch.visits) * 100 : 0
     }))
 
+    // Filter out channels with no activity
+    const activeChannels = channels.filter(ch => 
+      ch.spend > 0 || ch.leads > 0 || ch.visits > 0
+    )
+
     // Calculate totals for KPIs
-    const totals = channels.reduce((acc, ch) => ({
+    const totals = activeChannels.reduce((acc, ch) => ({
       totalSpend: acc.totalSpend + ch.spend,
       totalLeads: acc.totalLeads + ch.leads,
       totalVisits: acc.totalVisits + ch.visits,
-      totalAppointments: acc.totalAppointments + ch.appointments
-    }), { totalSpend: 0, totalLeads: 0, totalVisits: 0, totalAppointments: 0 })
+      totalAppointments: acc.totalAppointments + ch.appointments,
+      totalRevenue: acc.totalRevenue + ch.revenue,
+      roasSum: acc.roasSum + ch.roasSum,
+      conversionSum: acc.conversionSum + ch.conversionSum,
+      cacSum: acc.cacSum + ch.cacSum,
+      count: acc.count + ch.count
+    }), { 
+      totalSpend: 0, 
+      totalLeads: 0, 
+      totalVisits: 0, 
+      totalAppointments: 0,
+      totalRevenue: 0,
+      roasSum: 0,
+      conversionSum: 0,
+      cacSum: 0,
+      count: 0
+    })
 
-    // Calculate weighted averages
-    const weightedROAS = channels.reduce((sum, ch) => 
-      sum + (ch.avg_roas * (ch.spend / totals.totalSpend)), 0)
-    const weightedConversion = channels.reduce((sum, ch) => 
-      sum + (ch.avg_conversion * (ch.leads / totals.totalLeads)), 0)
-
+    // Use averages of the pre-calculated metrics
     return {
-      channels,
+      channels: activeChannels,
       totals: {
         ...totals,
-        avgROAS: weightedROAS,
-        avgConversion: weightedConversion,
-        avgCAC: totals.totalLeads > 0 ? totals.totalSpend / totals.totalLeads : 0
+        avgROAS: totals.count > 0 ? totals.roasSum / totals.count : 0,
+        avgConversion: totals.count > 0 ? totals.conversionSum / totals.count : 0,
+        avgCAC: totals.count > 0 ? totals.cacSum / totals.count : 0
       },
-      rawData
+      rawData: []
     }
-  }
-
-  const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log('Exporting dashboard data...')
   }
 
   if (loading) {
@@ -175,6 +275,17 @@ export default function MarketingDashboard() {
       </div>
     )
   }
+
+  // Get latest month's data and MoM change
+  const latestMonth = monthlyData?.[monthlyData.length - 1]
+  const monthOverMonthChanges = latestMonth?.changes || {}
+
+  // Data quality warning
+  const hasLowDataQuality = latestMonth && (
+    latestMonth.spend < 1000 || 
+    latestMonth.leads < 50 ||
+    latestMonth.revenue < 1000
+  )
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -191,42 +302,8 @@ export default function MarketingDashboard() {
               </p>
             </div>
             
-            <div className="flex items-center space-x-4">
-              {/* Date Range Selector */}
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <Select value={`${dateRange.start}_${dateRange.end}`} onValueChange={(value) => {
-                  const [start, end] = value.split('_')
-                  setDateRange({ start, end })
-                }}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Select date range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2024-12-01_2025-08-31">All Time</SelectItem>
-                    <SelectItem value="2025-06-01_2025-08-31">Last 3 Months</SelectItem>
-                    <SelectItem value="2025-01-01_2025-08-31">YTD 2025</SelectItem>
-                    <SelectItem value="2024-12-01_2024-12-31">Dec 2024</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* View Mode */}
-              <Select value={viewMode} onValueChange={(v: any) => setViewMode(v)}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="quarterly">Quarterly</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Export Button */}
-              <Button onClick={handleExport} variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
+            <div className="text-sm text-gray-600">
+              <span className="font-semibold">Last 5 Months:</span> {format(startDate, 'MMM yyyy')} - {format(endDate, 'MMM yyyy')}
             </div>
           </div>
         </div>
@@ -234,40 +311,82 @@ export default function MarketingDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* KPI Cards */}
-        <KPICards data={data?.totals} />
+        {/* Data Quality Warning */}
+        {hasLowDataQuality && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 mr-2" />
+              <div>
+                <h3 className="text-sm font-semibold text-yellow-900">Limited Data Available</h3>
+                <p className="text-sm text-yellow-800 mt-1">
+                  The current month has limited data which may affect metric accuracy. 
+                  Some channels may show zero or minimal activity.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* Channel Mix Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <ChannelMixCharts channels={data?.channels} type="spend" />
-          <ChannelMixCharts channels={data?.channels} type="leads" />
+        {/* Monthly Comparison Section */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Month-over-Month Performance</CardTitle>
+              <p className="text-sm text-gray-600">Comparing last 5 months of data</p>
+            </CardHeader>
+            <CardContent>
+              <MonthlyComparison data={monthlyData} />
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Performance Matrix */}
-        <div className="mt-8">
-          <PerformanceMatrix channels={data?.channels} />
+        {/* Current Month KPI Cards with MoM changes */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-4">Current Month Performance (August 2025)</h2>
+          <KPICards data={data?.totals} changes={monthOverMonthChanges} />
         </div>
 
-        {/* Channel Trends */}
-        <div className="mt-8">
-          <ChannelTrends data={data?.rawData} />
-        </div>
+        {/* Only show visualizations if there's meaningful data */}
+        {data?.channels && data.channels.length > 0 ? (
+          <>
+            {/* Channel Mix Charts - Current Month */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <ChannelMixCharts channels={data?.channels} type="spend" />
+              <ChannelMixCharts channels={data?.channels} type="leads" />
+            </div>
 
-        {/* Channel Comparison Table */}
-        <div className="mt-8">
-          <ChannelTable channels={data?.channels} />
-        </div>
+            {/* Performance Matrix - Current Month */}
+            <div className="mb-8">
+              <PerformanceMatrix channels={data?.channels} />
+            </div>
 
-        {/* Funnel Analysis */}
-        <div className="mt-8">
-          <FunnelAnalysis channels={data?.channels} />
-        </div>
+            {/* Channel Comparison Table - Current Month */}
+            <div className="mb-8">
+              <ChannelTable channels={data?.channels} />
+            </div>
 
-        {/* Cost Efficiency */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <CostEfficiency channels={data?.channels} metric="cpl" />
-          <CostEfficiency channels={data?.channels} metric="appointment_rate" />
-        </div>
+            {/* Funnel Analysis - Current Month */}
+            <div className="mb-8">
+              <FunnelAnalysis channels={data?.channels} />
+            </div>
+
+            {/* Cost Efficiency - Current Month */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CostEfficiency channels={data?.channels} metric="cpl" />
+              <CostEfficiency channels={data?.channels} metric="appointment_rate" />
+            </div>
+          </>
+        ) : (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Channel Data Available</h3>
+              <p className="text-gray-600">
+                No active marketing channels found for the current month.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   )
