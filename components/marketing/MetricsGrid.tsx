@@ -100,10 +100,12 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
   // Get sorted months
   const months = Object.keys(monthlyData).sort()
   
-  // Format month for display
+  // Format month for display (show month and year)
   const formatMonth = (month: string) => {
-    const date = new Date(month + '-01')
-    return date.toLocaleDateString('en-US', { month: 'short' })
+    // Parse month string directly to avoid timezone issues
+    const [year, monthNum] = month.split('-')
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    return `${monthNames[parseInt(monthNum) - 1]} ${year}`
   }
   
   // Format value based on metric type
