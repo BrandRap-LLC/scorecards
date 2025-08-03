@@ -140,7 +140,7 @@ export default function MarketingDashboard() {
         appointments: totals.appointments,
         revenue: totals.revenue,
         avgROAS: totals.count > 0 ? totals.roasSum / totals.count : 0, // Use average of total_roas from DB
-        avgConversion: totals.count > 0 ? totals.conversionSum / totals.count : 0, // Use average of total_conversion from DB
+        avgConversion: totals.count > 0 ? (totals.conversionSum / totals.count) * 100 : 0, // Convert from decimal to percentage
         avgCAC: totals.count > 0 ? totals.cacSum / totals.count : 0 // Use average of cac_total from DB
       }
     })
@@ -217,7 +217,7 @@ export default function MarketingDashboard() {
     const channels = Object.values(byChannel).map((ch: any) => ({
       ...ch,
       avg_roas: ch.count > 0 ? ch.roasSum / ch.count : 0, // Use average of total_roas
-      avg_conversion: ch.count > 0 ? ch.conversionSum / ch.count : 0, // Use average of total_conversion
+      avg_conversion: ch.count > 0 ? (ch.conversionSum / ch.count) * 100 : 0, // Convert from decimal to percentage
       cac: ch.count > 0 ? ch.cacSum / ch.count : 0, // Use average of cac_total
       appointment_rate: ch.leads > 0 ? (ch.appointments / ch.leads) * 100 : 0,
       cost_per_visit: ch.visits > 0 ? ch.spend / ch.visits : 0,
@@ -258,7 +258,7 @@ export default function MarketingDashboard() {
       totals: {
         ...totals,
         avgROAS: totals.count > 0 ? totals.roasSum / totals.count : 0,
-        avgConversion: totals.count > 0 ? totals.conversionSum / totals.count : 0,
+        avgConversion: totals.count > 0 ? (totals.conversionSum / totals.count) * 100 : 0, // Convert to percentage
         avgCAC: totals.count > 0 ? totals.cacSum / totals.count : 0
       },
       rawData: []
