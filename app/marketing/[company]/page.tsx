@@ -43,9 +43,9 @@ export default function MarketingDashboard() {
   const [data, setData] = useState<any>(null)
   const [monthlyData, setMonthlyData] = useState<any>(null)
 
-  // Get last 5 months of data
-  const endDate = new Date('2025-07-31') // Latest data point
-  const startDate = subMonths(endDate, 4) // 5 months total
+  // Get last 5 months of data (March through July 2025)
+  const endDate = new Date('2025-07-31') // End of July
+  const startDate = new Date('2025-03-01') // Start of March (5 months: Mar, Apr, May, Jun, Jul)
 
   // Validate company
   useEffect(() => {
@@ -67,8 +67,8 @@ export default function MarketingDashboard() {
         .from('executive_monthly_reports')
         .select('*')
         .eq('clinic', company)
-        .gte('month', format(startDate, 'yyyy-MM-dd'))
-        .lte('month', format(endDate, 'yyyy-MM-dd'))
+        .gte('month', '2025-03-01')
+        .lte('month', '2025-07-31')
         .order('month', { ascending: true })
       
       if (channelError) throw channelError
