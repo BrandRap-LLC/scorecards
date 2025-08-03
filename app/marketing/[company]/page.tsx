@@ -44,7 +44,7 @@ export default function MarketingDashboard() {
   const [monthlyData, setMonthlyData] = useState<any>(null)
 
   // Get last 5 months of data
-  const endDate = new Date('2025-08-31') // Latest data point
+  const endDate = new Date('2025-07-31') // Latest data point
   const startDate = subMonths(endDate, 4) // 5 months total
 
   // Validate company
@@ -79,7 +79,7 @@ export default function MarketingDashboard() {
 
       // Process overall data for current month
       const currentMonthData = channelData?.filter(
-        d => d.month.startsWith('2025-08')
+        d => d.month.startsWith('2025-07')
       ) || []
       
       // Process data with all months for trends but focus on current month for other metrics
@@ -342,7 +342,7 @@ export default function MarketingDashboard() {
 
         {/* Current Month KPI Cards with MoM changes */}
         <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-4">Current Month Performance (August 2025)</h2>
+          <h2 className="text-lg font-semibold mb-4">Current Month Performance (July 2025)</h2>
           <KPICards data={data?.totals} changes={monthOverMonthChanges} />
         </div>
 
