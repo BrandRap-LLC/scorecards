@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Weekly Scorecards",
-  description: "Weekly performance scorecards for clinic operations",
+  title: "Marketing Analytics",
+  description: "Marketing performance analytics for healthcare clinics",
 };
 
 export default function RootLayout({

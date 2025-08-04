@@ -2,6 +2,8 @@
 
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getHeatmapColor } from '@/lib/heatmap'
+import HeatmapLegend from '@/components/HeatmapLegend'
 
 interface MetricsGridProps {
   data: any[]
@@ -98,7 +100,7 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
   })
   
   // Get sorted months
-  const months = Object.keys(monthlyData).sort()
+  const months = Object.keys(monthlyData).sort().reverse()
   
   // Format month for display (show month and year)
   const formatMonth = (month: string) => {
@@ -205,11 +207,13 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
   ]
   
   return (
-    <Card className="shadow-lg">
-      <CardHeader className="bg-gray-50 border-b">
-        <CardTitle className="text-gray-900">Performance Metrics Grid</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="space-y-4">
+      <HeatmapLegend showInverted={true} />
+      <Card className="shadow-lg">
+        <CardHeader className="bg-gray-50 border-b">
+          <CardTitle className="text-gray-900">Performance Metrics Grid</CardTitle>
+        </CardHeader>
+        <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
@@ -230,22 +234,43 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
                       {group.title}
                     </td>
                   </tr>
-                  {group.metrics.map((metric, metricIndex) => (
-                    <tr key={`${groupIndex}-${metricIndex}`} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="p-2 text-sm text-gray-800">{metric.label}</td>
-                      {months.map(month => (
-                        <td key={month} className="text-right p-2 text-sm text-gray-900 font-medium">
-                          {formatValue(metric.key, monthlyData[month]?.[metric.key] || 0)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
+                  {group.metrics.map((metric, metricIndex) => {
+                    // Collect all values for this metric across all months for heatmap
+                    const allMetricValues = months.map(month => 
+                      monthlyData[month]?.[metric.key]
+                    ).filter(v => v !== null && v !== undefined)
+                    
+                    return (
+                      <tr key={`${groupIndex}-${metricIndex}`} className="border-b border-gray-100">
+                        <td className="p-2 text-sm text-gray-800">{metric.label}</td>
+                        {months.map(month => {
+                          const value = monthlyData[month]?.[metric.key] || 0
+                          
+                          // Get heatmap colors
+                          const { bgColor, textColor } = getHeatmapColor(
+                            value,
+                            allMetricValues,
+                            metric.key
+                          )
+                          
+                          return (
+                            <td key={month} className={`text-right p-2 text-sm font-medium ${bgColor}`}>
+                              <span className={textColor}>
+                                {formatValue(metric.key, value)}
+                              </span>
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    )
+                  })}
                 </React.Fragment>
               ))}
             </tbody>
           </table>
         </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

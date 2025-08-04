@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { getHistoricalWeeks, getCompanies, formatWeekDisplay } from '@/lib/api-weekly'
 import { WeeklyMetric } from '@/types/scorecards'
 import { formatCurrency, formatPercent, formatNumber } from '@/lib/utils'
+import { getHeatmapColor } from '@/lib/heatmap'
 import { Download, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
+import HeatmapLegend from '@/components/HeatmapLegend'
 
 interface WeeklyGridData {
   [companyId: number]: {
@@ -87,7 +89,7 @@ export default function GridPage() {
 
       // Sort weeks and take most recent 12
       const sortedWeeks = Array.from(weeks).sort().reverse().slice(0, 12)
-      setWeekHeaders(sortedWeeks.reverse()) // Reverse to show oldest to newest
+      setWeekHeaders(sortedWeeks) // Show newest to oldest
       
       setHistoricalData(organized)
       setCompanies(companiesData)
@@ -199,6 +201,9 @@ export default function GridPage() {
         </div>
       </div>
 
+      {/* Heatmap Legend */}
+      <HeatmapLegend showInverted={true} className="mb-4" />
+      
       {/* Filter Tabs */}
       <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
@@ -310,15 +315,27 @@ export default function GridPage() {
                                   const weekData = metric.weeklyValues[week]
                                   const isCurrentWeek = weekHeaders.indexOf(week) === weekHeaders.length - 1
                                   
+                                  // Collect all values for this metric across all weeks for heatmap
+                                  const allMetricValues = weekHeaders.map(w => 
+                                    metric.weeklyValues[w]?.value
+                                  ).filter(v => v !== null && v !== undefined)
+                                  
+                                  // Get heatmap colors
+                                  const { bgColor, textColor } = getHeatmapColor(
+                                    weekData?.value,
+                                    allMetricValues,
+                                    metric.metricCode
+                                  )
+                                  
                                   return (
                                     <td 
                                       key={week} 
                                       className={`px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm text-center ${
-                                        isCurrentWeek ? 'bg-blue-50 font-semibold' : ''
-                                      }`}
+                                        isCurrentWeek ? 'ring-2 ring-blue-400 ring-inset' : ''
+                                      } ${bgColor}`}
                                     >
                                       <div className="flex flex-col items-center">
-                                        <span className="text-gray-900 font-medium">
+                                        <span className={`font-medium ${textColor}`}>
                                           {weekData ? formatValue(weekData.value, metric.formatType) : '-'}
                                         </span>
                                         {weekData?.is_mtd && (

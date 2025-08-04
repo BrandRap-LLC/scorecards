@@ -1,174 +1,136 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { BarChart3, TrendingUp, Users, DollarSign, Target, ChevronRight } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ArrowRight, BarChart3, CheckCircle } from 'lucide-react'
+import { createClient } from '@supabase/supabase-js'
 
-export default function HomePage() {
-  const features = [
-    {
-      icon: BarChart3,
-      title: 'Channel Performance',
-      description: 'Track and analyze marketing channel effectiveness across all traffic sources'
-    },
-    {
-      icon: DollarSign,
-      title: 'Cost Efficiency',
-      description: 'Monitor CAC, ROAS, and spend allocation to optimize budget distribution'
-    },
-    {
-      icon: Target,
-      title: 'Conversion Tracking',
-      description: 'Measure funnel performance from impressions to appointments'
-    },
-    {
-      icon: Users,
-      title: 'Multi-Company View',
-      description: 'Dedicated dashboards for each of the 11 clinics with consistent metrics'
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+// Static company display names
+const COMPANY_NAMES: Record<string, string> = {
+  'advancedlifeclinic.com': 'Advanced Life Clinic',
+  'alluraderm.com': 'Alluraderm',
+  'bismarckbotox.com': 'Bismarck Botox',
+  'drridha.com': 'Dr. Ridha',
+  'genesis-medspa.com': 'Genesis MedSpa',
+  'greenspringaesthetics.com': 'Greenspring Aesthetics',
+  'kovakcosmeticcenter.com': 'Kovak Cosmetic Center',
+  'mirabilemd.com': 'Mirabile MD',
+  'myskintastic.com': 'My Skintastic',
+  'skincareinstitute.net': 'Skincare Institute',
+  'skinjectables.com': 'Skinjectables'
+}
+
+export default function Home() {
+  const [companies, setCompanies] = useState<Array<{ id: string; name: string; recordCount: number }>>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchCompanies()
+  }, [])
+
+  const fetchCompanies = async () => {
+    try {
+      // Fetch all unique companies from the database
+      const { data, error } = await supabase
+        .from('executive_monthly_reports')
+        .select('clinic')
+      
+      if (error) throw error
+
+      // Count records per company
+      const companyCounts = data.reduce((acc: Record<string, number>, row) => {
+        acc[row.clinic] = (acc[row.clinic] || 0) + 1
+        return acc
+      }, {})
+
+      // Create company list with counts
+      const companyList = Object.entries(companyCounts)
+        .map(([id, count]) => ({
+          id,
+          name: COMPANY_NAMES[id] || id.replace('.com', '').replace('.net', ''),
+          recordCount: count as number
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+
+      setCompanies(companyList)
+    } catch (error) {
+      console.error('Error fetching companies:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
 
-  const stats = [
-    { label: 'Companies', value: '11' },
-    { label: 'Traffic Sources', value: '8' },
-    { label: 'Data Points', value: '572+' },
-    { label: 'Time Period', value: '9 months' }
-  ]
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading companies...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Marketing Analytics Platform
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
+          <BarChart3 className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Marketing Performance Dashboards
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Comprehensive marketing performance dashboards for multi-location healthcare clinics.
-            Track channel effectiveness, optimize spend, and drive growth with data-driven insights.
+          <p className="text-lg text-gray-700">
+            Select a company to view their marketing channel performance
           </p>
-          
-          <div className="flex justify-center space-x-4">
-            <Link 
-              href="/marketing"
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
-            >
-              View Marketing Dashboards
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Link>
-            <Link
-              href="/marketing/advancedlifeclinic.com"
-              className="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors shadow-lg hover:shadow-xl border border-blue-200"
-            >
-              View Demo Dashboard
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Link>
+          <div className="mt-4 inline-flex items-center text-sm text-gray-600">
+            <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+            {companies.length} companies with data available
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md p-6 text-center">
-              <p className="text-3xl font-bold text-blue-600">{stat.value}</p>
-              <p className="text-sm text-gray-600 mt-1">{stat.label}</p>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {companies.map((company) => (
+            <Link 
+              key={company.id} 
+              href={`/marketing/${company.id}`}
+              className="block"
+            >
+              <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer h-full bg-white">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between text-gray-900">
+                    <span>{company.name}</span>
+                    <ArrowRight className="h-5 w-5 text-gray-400" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    {company.id}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between text-xs">
+                    <span className="text-gray-600">{company.recordCount} data points</span>
+                    <span className="text-green-600 font-semibold">Active</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
-      </div>
 
-      {/* Features Section */}
-      <div className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Powerful Marketing Analytics
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Everything you need to understand and optimize your marketing performance
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => {
-              const Icon = feature.icon
-              return (
-                <div key={index} className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-600 rounded-full mb-4">
-                    <Icon className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600">
-                    {feature.description}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Available Channels */}
-      <div className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Track All Your Marketing Channels
-            </h2>
-            <p className="text-lg text-gray-600">
-              Comprehensive coverage across all traffic sources
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { name: 'Google Ads', color: 'bg-blue-500' },
-                { name: 'Local SEO', color: 'bg-green-500' },
-                { name: 'Organic SEO', color: 'bg-green-600' },
-                { name: 'Social Ads', color: 'bg-blue-600' },
-                { name: 'Organic Social', color: 'bg-pink-500' },
-                { name: 'Reactivation', color: 'bg-purple-500' },
-                { name: 'Others', color: 'bg-gray-500' },
-                { name: 'Test', color: 'bg-amber-500' }
-              ].map((channel, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <div className={`w-4 h-4 rounded-full ${channel.color}`}></div>
-                  <span className="font-medium text-gray-700">{channel.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to explore your marketing data?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Access detailed performance metrics for all your clinics
+        <div className="mt-12 text-center">
+          <p className="text-sm text-gray-600">
+            Data sourced from executive_monthly_reports table
           </p>
-          <Link
-            href="/marketing"
-            className="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-xl text-lg"
-          >
-            Access Marketing Dashboards
-            <ChevronRight className="ml-2 h-6 w-6" />
-          </Link>
+          <p className="text-sm text-gray-600 mt-1">
+            Showing last 5 months with month-over-month comparisons
+          </p>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>Marketing Performance Dashboard • Data from executive_monthly_reports</p>
-          <p className="mt-2 text-sm">December 2024 - August 2025</p>
-        </div>
-      </footer>
     </div>
   )
 }
