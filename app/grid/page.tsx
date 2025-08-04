@@ -322,7 +322,9 @@ export default function GridPage() {
                                           {weekData ? formatValue(weekData.value, metric.formatType) : '-'}
                                         </span>
                                         {weekData?.is_mtd && (
-                                          <AlertTriangle className="h-3 w-3 text-yellow-500 mt-0.5" title="MTD - Incomplete" />
+                                          <span title="MTD - Incomplete">
+                                            <AlertTriangle className="h-3 w-3 text-yellow-500 mt-0.5" />
+                                          </span>
                                         )}
                                         {weekData?.wow_percent !== null && weekData.wow_percent !== 0 && (
                                           <span className={`text-xs mt-0.5 ${

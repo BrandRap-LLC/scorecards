@@ -88,9 +88,10 @@ export function SelectContent({ children, ...props }: SelectContentProps & any) 
       <div className="p-1">
         {React.Children.map(children, child => {
           if (React.isValidElement(child) && child.type === SelectItem) {
-            return React.cloneElement(child as any, {
+            const childWithProps = child as React.ReactElement<any>
+            return React.cloneElement(childWithProps, {
               onValueChange: props.onValueChange,
-              isSelected: child.props.value === props.selectedValue
+              isSelected: childWithProps.props.value === props.selectedValue
             })
           }
           return child

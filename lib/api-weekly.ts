@@ -87,7 +87,7 @@ export async function getCompanyWeeklyMetrics(companyId: number, weeks: number =
   if (!latestWeek) return []
 
   // Calculate the date range for the last N weeks
-  const weeksData = []
+  const weeksData: { year: number; week: number }[] = []
   let currentYear = latestWeek.year
   let currentWeek = latestWeek.week_number
 
