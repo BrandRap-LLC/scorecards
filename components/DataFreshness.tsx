@@ -8,7 +8,7 @@ export function DataFreshness() {
       <CheckCircle className="h-4 w-4 text-green-600" />
       <div className="text-sm">
         <span className="font-medium text-green-600">
-          Data current through July 2025
+          Data current through August 2025
         </span>
       </div>
     </div>

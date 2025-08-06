@@ -47,13 +47,13 @@ export default function MarketingDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true)
     try {
-      // Fetch March through July 2025 data
+      // Fetch April through August 2025 data (last 5 months)
       const { data: channelData, error } = await supabase
         .from('executive_monthly_reports')
         .select('*')
         .eq('clinic', company)
-        .gte('month', '2025-03-01')
-        .lte('month', '2025-07-31')
+        .gte('month', '2025-04-01')
+        .lte('month', '2025-08-31')
         .order('month', { ascending: true })
       
       if (error) throw error
@@ -93,7 +93,7 @@ export default function MarketingDashboard() {
             </div>
             
             <div className="text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">Period:</span> March - July 2025
+              <span className="font-semibold text-gray-900">Period:</span> April - August 2025
             </div>
           </div>
         </div>
