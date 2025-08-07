@@ -330,9 +330,7 @@ export default function GridPage() {
                                   return (
                                     <td 
                                       key={week} 
-                                      className={`px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm text-center ${
-                                        isCurrentWeek ? 'ring-2 ring-blue-400 ring-inset' : ''
-                                      } ${bgColor}`}
+                                      className={`px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm text-center ${bgColor}`}
                                     >
                                       <div className="flex flex-col items-center">
                                         <span className={`font-medium ${textColor}`}>

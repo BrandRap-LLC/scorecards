@@ -163,9 +163,7 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
                             return (
                               <td 
                                 key={month} 
-                                className={`text-right p-2 text-sm font-medium ${bgColor} ${
-                                  monthIndex === 0 ? 'ring-2 ring-blue-400 ring-inset' : ''
-                                }`}
+                                className={`text-right p-2 text-sm font-medium ${bgColor}`}
                               >
                                 <span className={textColor}>
                                   {formatValue(metric.key, value)}
