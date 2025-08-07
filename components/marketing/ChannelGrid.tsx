@@ -57,9 +57,9 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       _count: monthRecords.length
     }
     
-    // Sum up all channels for this month - NO CALCULATIONS
+    // Sum up all channels for this month - NO CALCULATIONS, NO WEIGHTED AVERAGES
     monthRecords.forEach(record => {
-      // Direct sum for all metrics
+      // Direct sum for all metrics - just show individual channel values
       monthlyTotals[month].impressions += record.impressions || 0
       monthlyTotals[month].visits += record.visits || 0
       monthlyTotals[month].leads += record.leads || 0
@@ -77,40 +77,16 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       monthlyTotals[month].new_estimated_revenue += record.new_estimated_revenue || 0
       monthlyTotals[month].ltv += record.ltv || 0
       monthlyTotals[month].estimated_ltv_6m += record.estimated_ltv_6m || 0
-      
-      // For metrics that need weighted averaging
-      monthlyTotals[month].total_conversion += (record.total_conversion || 0) * (record.leads || 0)
-      monthlyTotals[month].new_conversion += (record.new_conversion || 0) * (record.new_leads || 0)
-      monthlyTotals[month].avg_appointment_rev += (record.avg_appointment_rev || 0) * (record.total_appointments || 0)
-      monthlyTotals[month].avg_ltv += (record.avg_ltv || 0) * (record.leads || 0)
-      monthlyTotals[month].avg_estimated_ltv_6m += (record.avg_estimated_ltv_6m || 0) * (record.leads || 0)
-      monthlyTotals[month].total_roas += (record.total_roas || 0) * (record.spend || 0)
-      monthlyTotals[month].new_roas += (record.new_roas || 0) * (record.spend || 0)
-      monthlyTotals[month].cac_total += (record.cac_total || 0) * (record.leads || 0)
-      monthlyTotals[month].cac_new += (record.cac_new || 0) * (record.new_leads || 0)
+      monthlyTotals[month].avg_appointment_rev += record.avg_appointment_rev || 0
+      monthlyTotals[month].avg_ltv += record.avg_ltv || 0
+      monthlyTotals[month].avg_estimated_ltv_6m += record.avg_estimated_ltv_6m || 0
+      monthlyTotals[month].total_roas += record.total_roas || 0
+      monthlyTotals[month].new_roas += record.new_roas || 0
+      monthlyTotals[month].cac_total += record.cac_total || 0
+      monthlyTotals[month].cac_new += record.cac_new || 0
+      monthlyTotals[month].total_conversion += record.total_conversion || 0
+      monthlyTotals[month].new_conversion += record.new_conversion || 0
     })
-    
-    // Calculate weighted averages for percentage and average metrics
-    if (monthlyTotals[month].leads > 0) {
-      monthlyTotals[month].total_conversion = monthlyTotals[month].total_conversion / monthlyTotals[month].leads
-      monthlyTotals[month].avg_ltv = monthlyTotals[month].avg_ltv / monthlyTotals[month].leads
-      monthlyTotals[month].avg_estimated_ltv_6m = monthlyTotals[month].avg_estimated_ltv_6m / monthlyTotals[month].leads
-      monthlyTotals[month].cac_total = monthlyTotals[month].cac_total / monthlyTotals[month].leads
-    }
-    
-    if (monthlyTotals[month].new_leads > 0) {
-      monthlyTotals[month].new_conversion = monthlyTotals[month].new_conversion / monthlyTotals[month].new_leads
-      monthlyTotals[month].cac_new = monthlyTotals[month].cac_new / monthlyTotals[month].new_leads
-    }
-    
-    if (monthlyTotals[month].total_appointments > 0) {
-      monthlyTotals[month].avg_appointment_rev = monthlyTotals[month].avg_appointment_rev / monthlyTotals[month].total_appointments
-    }
-    
-    if (monthlyTotals[month].spend > 0) {
-      monthlyTotals[month].total_roas = monthlyTotals[month].total_roas / monthlyTotals[month].spend
-      monthlyTotals[month].new_roas = monthlyTotals[month].new_roas / monthlyTotals[month].spend
-    }
   })
   
   // Format month for display

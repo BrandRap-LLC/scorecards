@@ -29,8 +29,6 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
       leads: 0,
       new_leads: 0,
       returning_leads: 0,
-      total_conversion: 0,
-      new_conversion: 0,
       total_appointments: 0,
       new_appointments: 0,
       returning_appointments: 0,
@@ -42,18 +40,10 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
       total_estimated_revenue: 0,
       new_estimated_revenue: 0,
       avg_appointment_rev: 0,
-      total_roas: 0,
-      new_roas: 0,
-      cac_total: 0,
-      cac_new: 0,
-      ltv: 0,
-      avg_ltv: 0,
-      estimated_ltv_6m: 0,
-      avg_estimated_ltv_6m: 0,
       _count: monthRecords.length
     }
     
-    // Sum up all traffic sources for this month - NO CALCULATIONS
+    // Sum up all traffic sources for this month - NO CALCULATIONS, NO WEIGHTED AVERAGES
     monthRecords.forEach(record => {
       // Direct sum for all metrics
       monthlyTotals[month].impressions += record.impressions || 0
@@ -71,42 +61,9 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
       monthlyTotals[month].spend += record.spend || 0
       monthlyTotals[month].total_estimated_revenue += record.total_estimated_revenue || 0
       monthlyTotals[month].new_estimated_revenue += record.new_estimated_revenue || 0
-      monthlyTotals[month].ltv += record.ltv || 0
-      monthlyTotals[month].estimated_ltv_6m += record.estimated_ltv_6m || 0
-      
-      // For metrics that need weighted averaging
-      monthlyTotals[month].total_conversion += (record.total_conversion || 0) * (record.leads || 0)
-      monthlyTotals[month].new_conversion += (record.new_conversion || 0) * (record.new_leads || 0)
-      monthlyTotals[month].avg_appointment_rev += (record.avg_appointment_rev || 0) * (record.total_appointments || 0)
-      monthlyTotals[month].avg_ltv += (record.avg_ltv || 0) * (record.leads || 0)
-      monthlyTotals[month].avg_estimated_ltv_6m += (record.avg_estimated_ltv_6m || 0) * (record.leads || 0)
-      monthlyTotals[month].total_roas += (record.total_roas || 0) * (record.spend || 0)
-      monthlyTotals[month].new_roas += (record.new_roas || 0) * (record.spend || 0)
-      monthlyTotals[month].cac_total += (record.cac_total || 0) * (record.leads || 0)
-      monthlyTotals[month].cac_new += (record.cac_new || 0) * (record.new_leads || 0)
+      // For avg_appointment_rev, we'll just take the sum (not weighted)
+      monthlyTotals[month].avg_appointment_rev += record.avg_appointment_rev || 0
     })
-    
-    // Calculate weighted averages for percentage and average metrics
-    if (monthlyTotals[month].leads > 0) {
-      monthlyTotals[month].total_conversion = monthlyTotals[month].total_conversion / monthlyTotals[month].leads
-      monthlyTotals[month].avg_ltv = monthlyTotals[month].avg_ltv / monthlyTotals[month].leads
-      monthlyTotals[month].avg_estimated_ltv_6m = monthlyTotals[month].avg_estimated_ltv_6m / monthlyTotals[month].leads
-      monthlyTotals[month].cac_total = monthlyTotals[month].cac_total / monthlyTotals[month].leads
-    }
-    
-    if (monthlyTotals[month].new_leads > 0) {
-      monthlyTotals[month].new_conversion = monthlyTotals[month].new_conversion / monthlyTotals[month].new_leads
-      monthlyTotals[month].cac_new = monthlyTotals[month].cac_new / monthlyTotals[month].new_leads
-    }
-    
-    if (monthlyTotals[month].total_appointments > 0) {
-      monthlyTotals[month].avg_appointment_rev = monthlyTotals[month].avg_appointment_rev / monthlyTotals[month].total_appointments
-    }
-    
-    if (monthlyTotals[month].spend > 0) {
-      monthlyTotals[month].total_roas = monthlyTotals[month].total_roas / monthlyTotals[month].spend
-      monthlyTotals[month].new_roas = monthlyTotals[month].new_roas / monthlyTotals[month].spend
-    }
   })
   
   // Format month for display
@@ -121,26 +78,15 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
     if (value === null || value === undefined) return '-'
     
     // Currency metrics
-    if (metric.includes('revenue') || metric.includes('spend') || metric.includes('cac') || 
-        metric.includes('ltv') || metric.includes('rev')) {
+    if (metric.includes('revenue') || metric.includes('spend') || metric.includes('rev')) {
       return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 })
-    }
-    
-    // ROAS metrics (show as decimal with 2 places)
-    if (metric.includes('roas')) {
-      return value.toFixed(2)
-    }
-    
-    // Percentage metrics (already in percentage form from DB)
-    if (metric.includes('conversion') || metric.includes('rate')) {
-      return value.toFixed(1) + '%'
     }
     
     // Default: show as integer
     return Math.round(value).toLocaleString()
   }
   
-  // Define metric groups in display order - ALL 26 metrics from database
+  // Define metric groups in display order - REMOVED metrics as requested
   const metricGroups = [
     {
       title: 'Traffic & Engagement',
@@ -153,10 +99,8 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
       ]
     },
     {
-      title: 'Conversion Metrics',
+      title: 'Appointments',
       metrics: [
-        { key: 'total_conversion', label: 'Total Conversion %' },
-        { key: 'new_conversion', label: 'New Conversion %' },
         { key: 'total_appointments', label: 'Total Appointments' },
         { key: 'new_appointments', label: 'New Appointments' },
         { key: 'returning_appointments', label: 'Returning Appointments' },
@@ -178,24 +122,6 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
         { key: 'total_estimated_revenue', label: 'Total Est. Revenue' },
         { key: 'new_estimated_revenue', label: 'New Est. Revenue' },
         { key: 'avg_appointment_rev', label: 'Avg Appointment Revenue' }
-      ]
-    },
-    {
-      title: 'ROI Metrics',
-      metrics: [
-        { key: 'total_roas', label: 'Total ROAS' },
-        { key: 'new_roas', label: 'New ROAS' },
-        { key: 'cac_total', label: 'CAC Total' },
-        { key: 'cac_new', label: 'CAC New' }
-      ]
-    },
-    {
-      title: 'Lifetime Value',
-      metrics: [
-        { key: 'ltv', label: 'LTV' },
-        { key: 'avg_ltv', label: 'Average LTV' },
-        { key: 'estimated_ltv_6m', label: 'Estimated 6-Month LTV' },
-        { key: 'avg_estimated_ltv_6m', label: 'Avg Est. 6-Month LTV' }
       ]
     }
   ]
