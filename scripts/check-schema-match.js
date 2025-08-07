@@ -13,30 +13,34 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Required columns from MSSQL (removed 4 metrics)
+// Required columns from MSSQL (exact match)
 const requiredColumns = [
-  'cac_new',
-  'cac_total',
-  'estimated_ltv_6m',
+  'clinic',
+  'month',
+  'traffic_source',
   'impressions',
-  'leads',
-  'new_appointments',
-  'new_conversations',
-  'new_conversion',
-  'new_estimated_revenue',
-  'new_leads',
-  'new_roas',
-  'online_booking',
-  'returning_appointments',
-  'returning_conversations',
-  'returning_leads',
+  'visits',
   'spend',
-  'total_appointments',
-  'total_conversations',
-  'total_conversion',
-  'total_estimated_revenue',
+  'estimated_ltv_6m',
   'total_roas',
-  'visits'
+  'new_roas',
+  'leads',
+  'new_leads',
+  'returning_leads',
+  'total_conversion',
+  'new_conversion',
+  'returning_conversion',
+  'cac_total',
+  'cac_new',
+  'total_estimated_revenue',
+  'new_estimated_revenue',
+  'total_appointments',
+  'new_appointments',
+  'returning_appointments',
+  'online_booking',
+  'total_conversations',
+  'new_conversations',
+  'returning_conversations'
 ];
 
 async function checkSchema() {

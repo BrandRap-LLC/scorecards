@@ -35,6 +35,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       returning_leads: 0,
       total_conversion: 0,
       new_conversion: 0,
+      returning_conversion: 0,
       total_appointments: 0,
       new_appointments: 0,
       returning_appointments: 0,
@@ -78,6 +79,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       monthlyTotals[month].cac_new += record.cac_new || 0
       monthlyTotals[month].total_conversion += record.total_conversion || 0
       monthlyTotals[month].new_conversion += record.new_conversion || 0
+      monthlyTotals[month].returning_conversion += record.returning_conversion || 0
     })
   })
   
@@ -129,6 +131,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       metrics: [
         { key: 'total_conversion', label: 'Total Conversion %' },
         { key: 'new_conversion', label: 'New Conversion %' },
+        { key: 'returning_conversion', label: 'Returning Conversion %' },
         { key: 'total_appointments', label: 'Total Appointments' },
         { key: 'new_appointments', label: 'New Appointments' },
         { key: 'returning_appointments', label: 'Returning Appointments' },

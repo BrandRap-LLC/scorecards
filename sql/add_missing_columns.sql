@@ -31,6 +31,9 @@ ADD COLUMN IF NOT EXISTS avg_appointment_rev DECIMAL(10,2);
 ALTER TABLE executive_monthly_reports 
 ADD COLUMN IF NOT EXISTS avg_estimated_ltv_6m DECIMAL(10,2);
 
+ALTER TABLE executive_monthly_reports 
+ADD COLUMN IF NOT EXISTS returning_conversion DOUBLE PRECISION;
+
 -- Verify columns were added
 SELECT column_name, data_type 
 FROM information_schema.columns 
