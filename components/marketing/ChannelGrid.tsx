@@ -20,7 +20,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
     .reverse()
     .slice(0, 6) // Get latest 6 months
   
-  // Aggregate data by month (sum all channels)
+  // Aggregate data by month (sum channels if multiple)
   const monthlyTotals: Record<string, any> = {}
   
   months.forEach(month => {
@@ -57,8 +57,9 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       _count: monthRecords.length
     }
     
-    // Sum up all channels for this month
+    // Sum up all channels for this month - NO CALCULATIONS
     monthRecords.forEach(record => {
+      // Direct sum for all metrics
       monthlyTotals[month].impressions += record.impressions || 0
       monthlyTotals[month].visits += record.visits || 0
       monthlyTotals[month].leads += record.leads || 0
@@ -77,41 +78,38 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       monthlyTotals[month].ltv += record.ltv || 0
       monthlyTotals[month].estimated_ltv_6m += record.estimated_ltv_6m || 0
       
-      // For percentage and average metrics, we'll need to calculate weighted averages
+      // For metrics that need weighted averaging
       monthlyTotals[month].total_conversion += (record.total_conversion || 0) * (record.leads || 0)
       monthlyTotals[month].new_conversion += (record.new_conversion || 0) * (record.new_leads || 0)
       monthlyTotals[month].avg_appointment_rev += (record.avg_appointment_rev || 0) * (record.total_appointments || 0)
       monthlyTotals[month].avg_ltv += (record.avg_ltv || 0) * (record.leads || 0)
       monthlyTotals[month].avg_estimated_ltv_6m += (record.avg_estimated_ltv_6m || 0) * (record.leads || 0)
+      monthlyTotals[month].total_roas += (record.total_roas || 0) * (record.spend || 0)
+      monthlyTotals[month].new_roas += (record.new_roas || 0) * (record.spend || 0)
+      monthlyTotals[month].cac_total += (record.cac_total || 0) * (record.leads || 0)
+      monthlyTotals[month].cac_new += (record.cac_new || 0) * (record.new_leads || 0)
     })
     
-    // Calculate weighted averages and derived metrics
+    // Calculate weighted averages for percentage and average metrics
     if (monthlyTotals[month].leads > 0) {
       monthlyTotals[month].total_conversion = monthlyTotals[month].total_conversion / monthlyTotals[month].leads
       monthlyTotals[month].avg_ltv = monthlyTotals[month].avg_ltv / monthlyTotals[month].leads
       monthlyTotals[month].avg_estimated_ltv_6m = monthlyTotals[month].avg_estimated_ltv_6m / monthlyTotals[month].leads
+      monthlyTotals[month].cac_total = monthlyTotals[month].cac_total / monthlyTotals[month].leads
     }
     
     if (monthlyTotals[month].new_leads > 0) {
       monthlyTotals[month].new_conversion = monthlyTotals[month].new_conversion / monthlyTotals[month].new_leads
+      monthlyTotals[month].cac_new = monthlyTotals[month].cac_new / monthlyTotals[month].new_leads
     }
     
     if (monthlyTotals[month].total_appointments > 0) {
       monthlyTotals[month].avg_appointment_rev = monthlyTotals[month].avg_appointment_rev / monthlyTotals[month].total_appointments
     }
     
-    // Calculate ROAS and CAC
     if (monthlyTotals[month].spend > 0) {
-      monthlyTotals[month].total_roas = monthlyTotals[month].total_estimated_revenue / monthlyTotals[month].spend
-      monthlyTotals[month].new_roas = monthlyTotals[month].new_estimated_revenue / monthlyTotals[month].spend
-      
-      if (monthlyTotals[month].leads > 0) {
-        monthlyTotals[month].cac_total = monthlyTotals[month].spend / monthlyTotals[month].leads
-      }
-      
-      if (monthlyTotals[month].new_leads > 0) {
-        monthlyTotals[month].cac_new = monthlyTotals[month].spend / monthlyTotals[month].new_leads
-      }
+      monthlyTotals[month].total_roas = monthlyTotals[month].total_roas / monthlyTotals[month].spend
+      monthlyTotals[month].new_roas = monthlyTotals[month].new_roas / monthlyTotals[month].spend
     }
   })
   
@@ -137,7 +135,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       return value.toFixed(2)
     }
     
-    // Percentage metrics
+    // Percentage metrics (already in percentage form from DB)
     if (metric.includes('conversion') || metric.includes('rate')) {
       return value.toFixed(1) + '%'
     }
@@ -146,7 +144,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
     return Math.round(value).toLocaleString()
   }
   
-  // Define metric groups in display order
+  // Define metric groups in display order - ALL 26 metrics from database
   const metricGroups = [
     {
       title: 'Traffic & Engagement',
