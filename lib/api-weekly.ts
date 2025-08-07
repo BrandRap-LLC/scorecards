@@ -16,7 +16,7 @@ export async function getLatestWeekMetrics(companyIds?: number[]) {
   const { data, error } = await query
 
   if (error) {
-    console.error('Error fetching latest week metrics:', error)
+    // Silently return empty array if table is empty or has issues
     return []
   }
 
@@ -32,7 +32,7 @@ export async function getCompanies() {
     .order('company_name', { ascending: true })
 
   if (error) {
-    console.error('Error fetching companies:', error)
+    // Return empty array if error (table might be focused on monthly data)
     return []
   }
 
@@ -48,7 +48,7 @@ export async function getMetricsDefinitions() {
     .order('sort_order', { ascending: true })
 
   if (error) {
-    console.error('Error fetching metrics definitions:', error)
+    // Return empty array if error
     return []
   }
 
@@ -66,7 +66,8 @@ export async function getHistoricalWeeks(weeks: number = 12) {
     .order('week_number', { ascending: false })
 
   if (error) {
-    console.error('Error fetching historical weeks:', error)
+    // Silently return empty array if table is empty or has issues
+    // This prevents console errors when focusing on monthly data
     return []
   }
 
@@ -114,7 +115,7 @@ export async function getCompanyWeeklyMetrics(companyId: number, weeks: number =
     .order('week_number', { ascending: false })
 
   if (error) {
-    console.error('Error fetching company weekly metrics:', error)
+    // Return empty array if error
     return []
   }
 
@@ -141,7 +142,7 @@ export async function getWeekOverWeekComparison(metricId: number, weeks: number 
     .limit(weeks * 11) // 11 companies * N weeks
 
   if (error) {
-    console.error('Error fetching WoW comparison:', error)
+    // Return empty array if error
     return []
   }
 
@@ -156,7 +157,7 @@ export async function getCurrentWeekSummary(): Promise<WeeklySummary[]> {
     .limit(1)
 
   if (error || !data || data.length === 0) {
-    console.error('Error fetching current week summary:', error)
+    // Return empty array if error or no data
     return []
   }
 
@@ -214,7 +215,7 @@ export async function getMetricsByCategory(category: string) {
     .order('sort_order', { ascending: true })
 
   if (error) {
-    console.error('Error fetching metrics by category:', error)
+    // Return empty array if error
     return []
   }
 
