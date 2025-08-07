@@ -13,17 +13,13 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Required columns from MSSQL
+// Required columns from MSSQL (removed 4 metrics)
 const requiredColumns = [
-  'avg_appointment_rev',
-  'avg_estimated_ltv_6m',
-  'avg_ltv',
   'cac_new',
   'cac_total',
   'estimated_ltv_6m',
   'impressions',
   'leads',
-  'ltv',
   'new_appointments',
   'new_conversations',
   'new_conversion',

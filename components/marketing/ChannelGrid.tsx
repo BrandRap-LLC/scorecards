@@ -45,15 +45,11 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       spend: 0,
       total_estimated_revenue: 0,
       new_estimated_revenue: 0,
-      avg_appointment_rev: 0,
       total_roas: 0,
       new_roas: 0,
       cac_total: 0,
       cac_new: 0,
-      ltv: 0,
-      avg_ltv: 0,
       estimated_ltv_6m: 0,
-      avg_estimated_ltv_6m: 0,
       _count: monthRecords.length
     }
     
@@ -75,11 +71,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       monthlyTotals[month].spend += record.spend || 0
       monthlyTotals[month].total_estimated_revenue += record.total_estimated_revenue || 0
       monthlyTotals[month].new_estimated_revenue += record.new_estimated_revenue || 0
-      monthlyTotals[month].ltv += record.ltv || 0
       monthlyTotals[month].estimated_ltv_6m += record.estimated_ltv_6m || 0
-      monthlyTotals[month].avg_appointment_rev += record.avg_appointment_rev || 0
-      monthlyTotals[month].avg_ltv += record.avg_ltv || 0
-      monthlyTotals[month].avg_estimated_ltv_6m += record.avg_estimated_ltv_6m || 0
       monthlyTotals[month].total_roas += record.total_roas || 0
       monthlyTotals[month].new_roas += record.new_roas || 0
       monthlyTotals[month].cac_total += record.cac_total || 0
@@ -156,8 +148,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       metrics: [
         { key: 'spend', label: 'Ad Spend' },
         { key: 'total_estimated_revenue', label: 'Total Est. Revenue' },
-        { key: 'new_estimated_revenue', label: 'New Est. Revenue' },
-        { key: 'avg_appointment_rev', label: 'Avg Appointment Revenue' }
+        { key: 'new_estimated_revenue', label: 'New Est. Revenue' }
       ]
     },
     {
@@ -172,10 +163,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
     {
       title: 'Lifetime Value',
       metrics: [
-        { key: 'ltv', label: 'LTV' },
-        { key: 'avg_ltv', label: 'Average LTV' },
-        { key: 'estimated_ltv_6m', label: 'Estimated 6-Month LTV' },
-        { key: 'avg_estimated_ltv_6m', label: 'Avg Est. 6-Month LTV' }
+        { key: 'estimated_ltv_6m', label: 'Estimated 6-Month LTV' }
       ]
     }
   ]

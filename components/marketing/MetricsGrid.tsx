@@ -39,7 +39,6 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
       spend: 0,
       total_estimated_revenue: 0,
       new_estimated_revenue: 0,
-      avg_appointment_rev: 0,
       _count: monthRecords.length
     }
     
@@ -61,8 +60,6 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
       monthlyTotals[month].spend += record.spend || 0
       monthlyTotals[month].total_estimated_revenue += record.total_estimated_revenue || 0
       monthlyTotals[month].new_estimated_revenue += record.new_estimated_revenue || 0
-      // For avg_appointment_rev, we'll just take the sum (not weighted)
-      monthlyTotals[month].avg_appointment_rev += record.avg_appointment_rev || 0
     })
   })
   
@@ -120,8 +117,7 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
       metrics: [
         { key: 'spend', label: 'Ad Spend' },
         { key: 'total_estimated_revenue', label: 'Total Est. Revenue' },
-        { key: 'new_estimated_revenue', label: 'New Est. Revenue' },
-        { key: 'avg_appointment_rev', label: 'Avg Appointment Revenue' }
+        { key: 'new_estimated_revenue', label: 'New Est. Revenue' }
       ]
     }
   ]

@@ -65,16 +65,12 @@ async function migrate() {
       month: row.month,
       traffic_source: row.traffic_source,
       
-      // All 26 required metrics - direct mapping from MSSQL
-      avg_appointment_rev: row.avg_appointment_rev || 0,
-      avg_estimated_ltv_6m: row.avg_estimated_ltv_6m || 0,
-      avg_ltv: row.avg_ltv || 0,
+      // All required metrics - direct mapping from MSSQL (removed 4 metrics)
       cac_new: row.cac_new || 0,
       cac_total: row.cac_total || 0,
       estimated_ltv_6m: row.estimated_ltv_6m || 0,
       impressions: row.impressions || 0,
       leads: row.leads || 0,
-      ltv: row.ltv || 0,
       new_appointments: row.new_appointments || 0,
       new_conversations: row.new_conversations || 0,
       new_conversion: row.new_conversion || 0,
