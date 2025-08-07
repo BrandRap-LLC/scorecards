@@ -30,7 +30,6 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
         new_estimated_revenue: 0,
         total_roas: 0,
         new_roas: 0,
-        roas: 0,
         cac_total: 0,
         cac_new: 0,
         total_appointments: 0,
@@ -63,7 +62,6 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
     monthlyData[month].new_estimated_revenue += row.new_estimated_revenue || 0
     monthlyData[month].total_roas += row.total_roas || 0
     monthlyData[month].new_roas += row.new_roas || 0
-    monthlyData[month].roas += row.roas || 0
     monthlyData[month].cac_total += row.cac_total || 0
     monthlyData[month].cac_new += row.cac_new || 0
     monthlyData[month].total_appointments += row.total_appointments || 0
@@ -85,12 +83,10 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
   Object.keys(monthlyData).forEach(month => {
     const count = monthlyData[month].count
     if (count > 0) {
-      monthlyData[month].conversion_rate = monthlyData[month].conversion_rate / count
       monthlyData[month].total_conversion = monthlyData[month].total_conversion / count
       monthlyData[month].new_conversion = monthlyData[month].new_conversion / count
       monthlyData[month].total_roas = monthlyData[month].total_roas / count
       monthlyData[month].new_roas = monthlyData[month].new_roas / count
-      monthlyData[month].roas = monthlyData[month].roas / count
       monthlyData[month].cac_total = monthlyData[month].cac_total / count
       monthlyData[month].cac_new = monthlyData[month].cac_new / count
       monthlyData[month].avg_ltv = monthlyData[month].avg_ltv / count
@@ -166,8 +162,7 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
         { key: 'total_estimated_revenue', label: 'Total Estimated Revenue' },
         { key: 'new_estimated_revenue', label: 'New Estimated Revenue' },
         { key: 'total_roas', label: 'Total ROAS' },
-        { key: 'new_roas', label: 'New ROAS' },
-        { key: 'roas', label: 'ROAS' }
+        { key: 'new_roas', label: 'New ROAS' }
       ]
     },
     {
