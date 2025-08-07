@@ -16,6 +16,101 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
     .reverse()
     .slice(0, 6) // Get latest 6 months
   
+  // Aggregate data by month (sum all traffic sources)
+  const monthlyTotals: Record<string, any> = {}
+  
+  months.forEach(month => {
+    const monthRecords = data.filter(row => row.month === month)
+    
+    // Initialize totals for this month
+    monthlyTotals[month] = {
+      impressions: 0,
+      visits: 0,
+      leads: 0,
+      new_leads: 0,
+      returning_leads: 0,
+      total_conversion: 0,
+      new_conversion: 0,
+      total_appointments: 0,
+      new_appointments: 0,
+      returning_appointments: 0,
+      online_booking: 0,
+      total_conversations: 0,
+      new_conversations: 0,
+      returning_conversations: 0,
+      spend: 0,
+      total_estimated_revenue: 0,
+      new_estimated_revenue: 0,
+      avg_appointment_rev: 0,
+      total_roas: 0,
+      new_roas: 0,
+      cac_total: 0,
+      cac_new: 0,
+      ltv: 0,
+      avg_ltv: 0,
+      estimated_ltv_6m: 0,
+      avg_estimated_ltv_6m: 0,
+      _count: monthRecords.length // Track number of records for averaging
+    }
+    
+    // Sum up all traffic sources for this month
+    monthRecords.forEach(record => {
+      monthlyTotals[month].impressions += record.impressions || 0
+      monthlyTotals[month].visits += record.visits || 0
+      monthlyTotals[month].leads += record.leads || 0
+      monthlyTotals[month].new_leads += record.new_leads || 0
+      monthlyTotals[month].returning_leads += record.returning_leads || 0
+      monthlyTotals[month].total_appointments += record.total_appointments || 0
+      monthlyTotals[month].new_appointments += record.new_appointments || 0
+      monthlyTotals[month].returning_appointments += record.returning_appointments || 0
+      monthlyTotals[month].online_booking += record.online_booking || 0
+      monthlyTotals[month].total_conversations += record.total_conversations || 0
+      monthlyTotals[month].new_conversations += record.new_conversations || 0
+      monthlyTotals[month].returning_conversations += record.returning_conversations || 0
+      monthlyTotals[month].spend += record.spend || 0
+      monthlyTotals[month].total_estimated_revenue += record.total_estimated_revenue || 0
+      monthlyTotals[month].new_estimated_revenue += record.new_estimated_revenue || 0
+      monthlyTotals[month].ltv += record.ltv || 0
+      monthlyTotals[month].estimated_ltv_6m += record.estimated_ltv_6m || 0
+      
+      // For percentage and average metrics, we'll need to calculate weighted averages
+      monthlyTotals[month].total_conversion += (record.total_conversion || 0) * (record.leads || 0)
+      monthlyTotals[month].new_conversion += (record.new_conversion || 0) * (record.new_leads || 0)
+      monthlyTotals[month].avg_appointment_rev += (record.avg_appointment_rev || 0) * (record.total_appointments || 0)
+      monthlyTotals[month].avg_ltv += (record.avg_ltv || 0) * (record.leads || 0)
+      monthlyTotals[month].avg_estimated_ltv_6m += (record.avg_estimated_ltv_6m || 0) * (record.leads || 0)
+    })
+    
+    // Calculate weighted averages and derived metrics
+    if (monthlyTotals[month].leads > 0) {
+      monthlyTotals[month].total_conversion = monthlyTotals[month].total_conversion / monthlyTotals[month].leads
+      monthlyTotals[month].avg_ltv = monthlyTotals[month].avg_ltv / monthlyTotals[month].leads
+      monthlyTotals[month].avg_estimated_ltv_6m = monthlyTotals[month].avg_estimated_ltv_6m / monthlyTotals[month].leads
+    }
+    
+    if (monthlyTotals[month].new_leads > 0) {
+      monthlyTotals[month].new_conversion = monthlyTotals[month].new_conversion / monthlyTotals[month].new_leads
+    }
+    
+    if (monthlyTotals[month].total_appointments > 0) {
+      monthlyTotals[month].avg_appointment_rev = monthlyTotals[month].avg_appointment_rev / monthlyTotals[month].total_appointments
+    }
+    
+    // Calculate ROAS and CAC
+    if (monthlyTotals[month].spend > 0) {
+      monthlyTotals[month].total_roas = monthlyTotals[month].total_estimated_revenue / monthlyTotals[month].spend
+      monthlyTotals[month].new_roas = monthlyTotals[month].new_estimated_revenue / monthlyTotals[month].spend
+      
+      if (monthlyTotals[month].leads > 0) {
+        monthlyTotals[month].cac_total = monthlyTotals[month].spend / monthlyTotals[month].leads
+      }
+      
+      if (monthlyTotals[month].new_leads > 0) {
+        monthlyTotals[month].cac_new = monthlyTotals[month].spend / monthlyTotals[month].new_leads
+      }
+    }
+  })
+  
   // Format month for display
   const formatMonth = (month: string) => {
     const [year, monthNum] = month.split('-')
@@ -109,8 +204,7 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
   
   // Get value for a specific metric and month
   const getValue = (metricKey: string, month: string) => {
-    const record = data.find(d => d.month === month)
-    return record ? record[metricKey] : null
+    return monthlyTotals[month] ? monthlyTotals[month][metricKey] : null
   }
   
   // Get all values for a metric across all months (for heatmap)
@@ -123,7 +217,7 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
       <HeatmapLegend showInverted={true} />
       <Card className="shadow-lg">
         <CardHeader className="bg-gray-50 border-b">
-          <CardTitle className="text-gray-900">Monthly Performance Metrics</CardTitle>
+          <CardTitle className="text-gray-900">Monthly Performance Metrics (All Traffic Sources Combined)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
