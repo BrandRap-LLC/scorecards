@@ -79,40 +79,40 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
-          <BarChart3 className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+        <div className="text-center mb-8 sm:mb-12">
+          <BarChart3 className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600 mx-auto mb-3 sm:mb-4" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
             Marketing Performance Dashboards
           </h1>
-          <p className="text-lg text-gray-700">
+          <p className="text-base sm:text-lg text-gray-700 px-4">
             Select a company to view their marketing channel performance
           </p>
-          <div className="mt-4 inline-flex items-center text-sm text-gray-600">
+          <div className="mt-3 sm:mt-4 inline-flex items-center text-sm text-gray-600">
             <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
             {companies.length} companies with data available
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {companies.map((company) => (
             <Link 
               key={company.id} 
               href={`/marketing/${company.id}`}
               className="block"
             >
-              <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer h-full bg-white">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between text-gray-900">
-                    <span>{company.name}</span>
-                    <ArrowRight className="h-5 w-5 text-gray-400" />
+              <Card className="hover:shadow-lg transition-all sm:hover:scale-105 cursor-pointer h-full bg-white">
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center justify-between text-gray-900 text-base sm:text-lg">
+                    <span className="truncate pr-2">{company.name}</span>
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
+                <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">
                     {company.id}
                   </p>
-                  <div className="mt-4 flex items-center justify-between text-xs">
+                  <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs">
                     <span className="text-gray-600">{company.recordCount} data points</span>
                     <span className="text-green-600 font-semibold">Active</span>
                   </div>
@@ -122,11 +122,11 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mt-12 text-center">
-          <p className="text-sm text-gray-600">
+        <div className="mt-8 sm:mt-12 text-center px-4">
+          <p className="text-xs sm:text-sm text-gray-600">
             Data sourced from executive_monthly_reports table
           </p>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             Showing last 5 months with month-over-month comparisons
           </p>
         </div>
