@@ -8,6 +8,8 @@ import ChannelGrid from '@/components/marketing/ChannelGrid'
 import WeeklyMetricsGrid from '@/components/marketing/WeeklyMetricsGrid'
 import WeeklyChannelGrid from '@/components/marketing/WeeklyChannelGrid'
 import HeatmapLegend from '@/components/HeatmapLegend'
+import PaidGrid from '@/components/PaidGrid'
+import SEOGrid from '@/components/SEOGrid'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,7 +38,7 @@ export default function MarketingDashboard() {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any[]>([])
   const [weeklyData, setWeeklyData] = useState<any[]>([])
-  const [activeTab, setActiveTab] = useState<'overview' | 'channels' | 'weekly'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'channels' | 'weekly' | 'paid' | 'seo'>('overview')
   const [isTransitioning, setIsTransitioning] = useState(false)
 
   // Validate company
@@ -163,6 +165,34 @@ export default function MarketingDashboard() {
             >
               Weekly
             </button>
+            <button
+              onClick={() => {
+                setIsTransitioning(true)
+                setActiveTab('paid')
+                setTimeout(() => setIsTransitioning(false), 150)
+              }}
+              className={`flex-1 sm:flex-none py-3 px-4 sm:px-1 sm:ml-8 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'paid'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Paid
+            </button>
+            <button
+              onClick={() => {
+                setIsTransitioning(true)
+                setActiveTab('seo')
+                setTimeout(() => setIsTransitioning(false), 150)
+              }}
+              className={`flex-1 sm:flex-none py-3 px-4 sm:px-1 sm:ml-8 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'seo'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              SEO
+            </button>
           </nav>
         </div>
       </div>
@@ -191,7 +221,7 @@ export default function MarketingDashboard() {
               channels={['local seo', 'organic seo']} 
             />
           </div>
-        ) : (
+        ) : activeTab === 'weekly' ? (
           <div className="space-y-4 sm:space-y-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
               <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">Weekly View</h3>
@@ -215,7 +245,23 @@ export default function MarketingDashboard() {
               channels={['local seo', 'organic seo']} 
             />
           </div>
-          )}
+        ) : activeTab === 'paid' ? (
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">Paid Ads Data</h3>
+              <p className="text-xs sm:text-sm text-blue-800">Raw data from paid_ads table showing campaign-level performance</p>
+            </div>
+            <PaidGrid clinic={company} />
+          </div>
+        ) : activeTab === 'seo' ? (
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">SEO Channels Data</h3>
+              <p className="text-xs sm:text-sm text-blue-800">Raw data from seo_channels table showing organic and local SEO performance</p>
+            </div>
+            <SEOGrid clinic={company} />
+          </div>
+        ) : null}
         </div>
       </main>
     </div>
