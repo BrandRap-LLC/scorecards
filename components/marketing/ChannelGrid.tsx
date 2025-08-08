@@ -22,6 +22,9 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
     .reverse()
     .slice(0, 6) // Get latest 6 months
   
+  // Get current month for highlighting
+  const currentMonth = months[0] // Most recent month in data
+  
   // Aggregate data by month (sum channels if multiple)
   const monthlyTotals: Record<string, any> = {}
   
@@ -92,14 +95,17 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
     return `${monthNames[parseInt(monthNum) - 1]} ${year}`
   }
   
-  // Format value based on metric type
+  // Format value based on metric type with consistent decimal places
   const formatValue = (metric: string, value: number | null) => {
     if (value === null || value === undefined) return '-'
     
-    // Currency metrics
+    // Currency metrics - no decimals
     if (metric.includes('revenue') || metric.includes('spend') || metric.includes('cac') || 
         metric.includes('ltv') || metric.includes('rev')) {
-      return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 })
+      return '$' + value.toLocaleString('en-US', { 
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0 
+      })
     }
     
     // ROAS metrics (show as decimal with 2 places)
@@ -112,7 +118,14 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       return value.toFixed(1) + '%'
     }
     
-    // Default: show as integer
+    // Large numbers - use K/M notation
+    if (value >= 1000000) {
+      return (value / 1000000).toFixed(1) + 'M'
+    } else if (value >= 10000) {
+      return (value / 1000).toFixed(0) + 'K'
+    }
+    
+    // Default: show as integer with commas
     return Math.round(value).toLocaleString()
   }
   
@@ -219,7 +232,14 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
                     Metric
                   </th>
                   {months.map(month => (
-                    <th key={month} className="text-right px-3 py-3 text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wider min-w-[80px] sm:min-w-[100px] whitespace-nowrap">
+                    <th 
+                      key={month} 
+                      className={`text-right px-3 py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider min-w-[80px] sm:min-w-[100px] whitespace-nowrap border-l border-gray-200 ${
+                        month === currentMonth 
+                          ? 'bg-blue-50 text-blue-900' 
+                          : 'text-gray-700'
+                      }`}
+                    >
                       <span className="hidden sm:inline">{formatMonth(month)}</span>
                       <span className="sm:hidden">{formatMonth(month).split(' ')[0]}</span>
                     </th>
@@ -229,8 +249,13 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
               <tbody className="divide-y divide-gray-200 bg-white">
                 {metricGroups.map((group, groupIndex) => (
                   <React.Fragment key={groupIndex}>
-                    <tr className="bg-gray-50">
-                      <td colSpan={months.length + 1} className="px-3 py-2 text-xs sm:text-sm font-semibold text-gray-700">
+                    {groupIndex > 0 && (
+                      <tr className="h-2 bg-gray-100">
+                        <td colSpan={months.length + 1}></td>
+                      </tr>
+                    )}
+                    <tr className="bg-gradient-to-r from-gray-100 to-gray-50">
+                      <td colSpan={months.length + 1} className="px-3 py-2.5 text-xs sm:text-sm font-semibold text-gray-800 border-l-4 border-gray-400">
                         {group.title}
                       </td>
                     </tr>
@@ -258,11 +283,20 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
                             return (
                               <td 
                                 key={month} 
-                                className={`text-right px-3 py-3 text-xs sm:text-sm font-medium ${bgColor} whitespace-nowrap`}
+                                className={`relative text-right px-3 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group ${bgColor} ${
+                                  month === currentMonth ? 'font-bold' : ''
+                                }`}
+                                title={value !== null ? `${metric.label}: ${value}` : 'No data'}
                               >
                                 <span className={textColor}>
                                   {formatValue(metric.key, value)}
                                 </span>
+                                {/* Hover overlay with exact value */}
+                                {value !== null && (
+                                  <div className="absolute inset-0 bg-gray-900 bg-opacity-90 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    {value.toLocaleString()}
+                                  </div>
+                                )}
                               </td>
                             )
                           })}

@@ -71,6 +71,14 @@ export function getHeatmapColor(
       textColor: 'text-gray-500',
     }
   }
+  
+  // Special case for zero values - neutral gray
+  if (value === 0) {
+    return {
+      bgColor: 'bg-gray-100',
+      textColor: 'text-gray-600',
+    }
+  }
 
   // 2. Filter out null values for calculation
   const validValues = allValues.filter((v): v is number => 

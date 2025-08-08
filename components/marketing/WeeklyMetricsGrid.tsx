@@ -18,6 +18,9 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
     .reverse()
     .slice(0, 12) // Get latest 12 weeks
   
+  // Get current week for highlighting
+  const currentWeek = weeks[0] // Most recent week in data
+  
   // Aggregate data by week (sum all traffic sources)
   const weeklyTotals: Record<string, any> = {}
   
@@ -84,16 +87,31 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
     }
   }
   
-  // Format value based on metric type
+  // Format value based on metric type with consistent decimal places
   const formatValue = (metric: string, value: number | null) => {
     if (value === null || value === undefined) return '-'
     
-    // Currency metrics
+    // Currency metrics - no decimals
     if (metric.includes('revenue') || metric.includes('spend') || metric.includes('rev')) {
-      return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 })
+      return '$' + value.toLocaleString('en-US', { 
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0 
+      })
     }
     
-    // Default: show as integer
+    // Percentage metrics - 1 decimal
+    if (metric.includes('conversion') || metric.includes('rate')) {
+      return value.toFixed(1) + '%'
+    }
+    
+    // Large numbers - use K/M notation
+    if (value >= 1000000) {
+      return (value / 1000000).toFixed(1) + 'M'
+    } else if (value >= 10000) {
+      return (value / 1000).toFixed(0) + 'K'
+    }
+    
+    // Default: show as integer with commas
     return Math.round(value).toLocaleString()
   }
   
@@ -168,7 +186,14 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
                       Metric
                     </th>
                     {weeks.map(week => (
-                      <th key={week} className="text-right px-3 py-3 text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wider min-w-[80px] sm:min-w-[100px] whitespace-nowrap">
+                      <th 
+                        key={week} 
+                        className={`text-right px-3 py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider min-w-[80px] sm:min-w-[100px] whitespace-nowrap border-l border-gray-200 ${
+                          week === currentWeek 
+                            ? 'bg-blue-50 text-blue-900' 
+                            : 'text-gray-700'
+                        }`}
+                      >
                         <span className="hidden sm:inline">{formatWeek(week)}</span>
                         <span className="sm:hidden text-xs">{formatWeek(week).split(' ')[1]}</span>
                       </th>

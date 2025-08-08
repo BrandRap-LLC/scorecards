@@ -37,6 +37,7 @@ export default function MarketingDashboard() {
   const [data, setData] = useState<any[]>([])
   const [weeklyData, setWeeklyData] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState<'overview' | 'channels' | 'weekly'>('overview')
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   // Validate company
   useEffect(() => {
@@ -121,7 +122,11 @@ export default function MarketingDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex" aria-label="Tabs">
             <button
-              onClick={() => setActiveTab('overview')}
+              onClick={() => {
+                setIsTransitioning(true)
+                setActiveTab('overview')
+                setTimeout(() => setIsTransitioning(false), 150)
+              }}
               className={`flex-1 sm:flex-none py-3 px-4 sm:px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'overview'
                   ? 'border-blue-600 text-blue-600'
@@ -131,7 +136,11 @@ export default function MarketingDashboard() {
               Overview
             </button>
             <button
-              onClick={() => setActiveTab('channels')}
+              onClick={() => {
+                setIsTransitioning(true)
+                setActiveTab('channels')
+                setTimeout(() => setIsTransitioning(false), 150)
+              }}
               className={`flex-1 sm:flex-none py-3 px-4 sm:px-1 sm:ml-8 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'channels'
                   ? 'border-blue-600 text-blue-600'
@@ -141,7 +150,11 @@ export default function MarketingDashboard() {
               Channels
             </button>
             <button
-              onClick={() => setActiveTab('weekly')}
+              onClick={() => {
+                setIsTransitioning(true)
+                setActiveTab('weekly')
+                setTimeout(() => setIsTransitioning(false), 150)
+              }}
               className={`flex-1 sm:flex-none py-3 px-4 sm:px-1 sm:ml-8 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'weekly'
                   ? 'border-blue-600 text-blue-600'
@@ -156,9 +169,10 @@ export default function MarketingDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {activeTab === 'overview' ? (
-          <MetricsGrid data={data} />
-        ) : activeTab === 'channels' ? (
+        <div className={`transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+          {activeTab === 'overview' ? (
+            <MetricsGrid data={data} />
+          ) : activeTab === 'channels' ? (
           <div className="space-y-4 sm:space-y-6">
             <HeatmapLegend showInverted={true} />
             <ChannelGrid 
@@ -201,7 +215,8 @@ export default function MarketingDashboard() {
               channels={['local seo', 'organic seo']} 
             />
           </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   )
