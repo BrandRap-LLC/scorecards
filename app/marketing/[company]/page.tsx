@@ -8,8 +8,8 @@ import ChannelGrid from '@/components/marketing/ChannelGrid'
 import WeeklyMetricsGrid from '@/components/marketing/WeeklyMetricsGrid'
 import WeeklyChannelGrid from '@/components/marketing/WeeklyChannelGrid'
 import HeatmapLegend from '@/components/HeatmapLegend'
-import PaidGrid from '@/components/PaidGrid'
-import SEOGrid from '@/components/SEOGrid'
+import PaidChannelGrid from '@/components/PaidChannelGrid'
+import SEOChannelGrid from '@/components/SEOChannelGrid'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -248,18 +248,20 @@ export default function MarketingDashboard() {
         ) : activeTab === 'paid' ? (
           <div className="space-y-4 sm:space-y-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-              <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">Paid Ads Data</h3>
-              <p className="text-xs sm:text-sm text-blue-800">Raw data from paid_ads table showing campaign-level performance</p>
+              <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">Paid Ads by Campaign</h3>
+              <p className="text-xs sm:text-sm text-blue-800">Campaign-level performance metrics across months</p>
             </div>
-            <PaidGrid clinic={company} />
+            <HeatmapLegend showInverted={true} />
+            <PaidChannelGrid clinic={company} />
           </div>
         ) : activeTab === 'seo' ? (
           <div className="space-y-4 sm:space-y-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-              <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">SEO Channels Data</h3>
-              <p className="text-xs sm:text-sm text-blue-800">Raw data from seo_channels table showing organic and local SEO performance</p>
+              <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">SEO Channels</h3>
+              <p className="text-xs sm:text-sm text-blue-800">Organic and Local SEO performance metrics across months</p>
             </div>
-            <SEOGrid clinic={company} />
+            <HeatmapLegend showInverted={true} />
+            <SEOChannelGrid clinic={company} />
           </div>
         ) : null}
         </div>
