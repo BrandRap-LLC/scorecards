@@ -180,9 +180,20 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
     }
   ]
   
-  // Filter out ROI Metrics for SEO channels
+  // Filter metrics for SEO channels
   const metricGroups = isSEO 
-    ? baseMetricGroups.filter(group => group.title !== 'ROI Metrics')
+    ? baseMetricGroups
+        .filter(group => group.title !== 'ROI Metrics')
+        .map(group => {
+          // Remove Ad Spend from Financial Performance for SEO
+          if (group.title === 'Financial Performance') {
+            return {
+              ...group,
+              metrics: group.metrics.filter(metric => metric.key !== 'spend')
+            }
+          }
+          return group
+        })
     : baseMetricGroups
   
   // Get value for a specific metric and week
