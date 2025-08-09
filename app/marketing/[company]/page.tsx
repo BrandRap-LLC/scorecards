@@ -70,13 +70,20 @@ export default function MarketingDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true)
     try {
-      // Fetch last 6 months of monthly data
+      // Fetch last 6 months of monthly data dynamically
+      const sixMonthsAgo = new Date()
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
+      sixMonthsAgo.setDate(1) // First day of month
+      
+      const currentDate = new Date()
+      const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+      
       const { data: channelData, error: monthlyError } = await supabase
         .from('executive_monthly_reports')
         .select('*')
         .eq('clinic', company)
-        .gte('month', '2025-03-01')
-        .lte('month', '2025-08-31')
+        .gte('month', sixMonthsAgo.toISOString().split('T')[0])
+        .lte('month', endOfMonth.toISOString().split('T')[0])
         .order('month', { ascending: true })
       
       if (monthlyError) throw monthlyError

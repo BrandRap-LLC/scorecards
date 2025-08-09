@@ -126,7 +126,7 @@ export default function Home() {
             Data sourced from executive_monthly_reports table
           </p>
           <p className="text-xs sm:text-sm text-gray-600 mt-1">
-            Showing last 5 months with month-over-month comparisons
+            Showing last 6 months with month-over-month comparisons
           </p>
         </div>
       </div>
