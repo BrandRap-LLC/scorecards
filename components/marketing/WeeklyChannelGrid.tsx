@@ -128,8 +128,11 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
     return Math.round(value).toLocaleString()
   }
   
+  // Check if this is SEO data (includes local seo or organic seo)
+  const isSEO = channels.some(channel => channel.includes('seo'))
+  
   // Define metric groups in display order - ALL 26 metrics from database
-  const metricGroups = [
+  const baseMetricGroups = [
     {
       title: 'Traffic & Engagement',
       metrics: [
@@ -176,6 +179,11 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
       ]
     }
   ]
+  
+  // Filter out ROI Metrics for SEO channels
+  const metricGroups = isSEO 
+    ? baseMetricGroups.filter(group => group.title !== 'ROI Metrics')
+    : baseMetricGroups
   
   // Get value for a specific metric and week
   const getValue = (metricKey: string, week: string) => {
