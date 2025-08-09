@@ -82,6 +82,9 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
     // Filter data for this specific campaign
     const campaignData = data.filter(row => row.campaign === campaign)
     
+    // Get the traffic source for this campaign (should be consistent across all records)
+    const trafficSource = campaignData[0]?.traffic_source || 'unknown'
+    
     // Use the consistent months from all data
     const months = allMonths
     
@@ -180,7 +183,7 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
           <CardTitle className="text-sm sm:text-lg lg:text-xl text-gray-900">
             {campaign}
             <span className="block sm:inline text-xs sm:text-sm font-normal text-gray-600 mt-1 sm:mt-0 sm:ml-2">
-              (Paid Campaign)
+              ({trafficSource === 'google ads' ? 'Google Ads' : trafficSource === 'social ads' ? 'Social Ads' : 'Paid Campaign'})
             </span>
           </CardTitle>
         </CardHeader>
