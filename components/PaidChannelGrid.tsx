@@ -53,11 +53,6 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
     )
   }
 
-  // Get unique campaigns and sort them
-  const campaigns = [...new Set(data.map(row => row.campaign))]
-    .filter((campaign): campaign is string => campaign !== null && campaign !== undefined && campaign !== 'unknown campaign')
-    .sort()
-
   // Get ALL unique months from ALL data (not per campaign) and sort them (newest first)
   const allMonths = [...new Set(data.map(row => row.month))]
     .sort()
@@ -66,6 +61,21 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
   
   // Get current month for highlighting
   const currentMonth = allMonths[0] // Most recent month in data
+
+  // Get unique campaigns that have impressions > 1 in the most recent month
+  const campaignsWithRecentImpressions = data
+    .filter(row => 
+      row.month === currentMonth && 
+      row.impressions !== null && 
+      row.impressions > 1
+    )
+    .map(row => row.campaign)
+    .filter((campaign): campaign is string => campaign !== null && campaign !== undefined)
+
+  // Get unique campaigns and sort them, filtering by recent impressions
+  const campaigns = [...new Set(campaignsWithRecentImpressions)]
+    .filter(campaign => campaign !== 'unknown campaign')
+    .sort()
 
   // Process each campaign separately
   const campaignGrids = campaigns.map(campaign => {
@@ -280,7 +290,12 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
           <CardTitle className="text-gray-900">Paid Ads</CardTitle>
         </CardHeader>
         <CardContent className="py-8">
-          <p className="text-center text-gray-500">No paid ads data available</p>
+          <p className="text-center text-gray-500">
+            {data.length > 0 
+              ? `No campaigns with impressions > 1 in ${currentMonth ? new Date(currentMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'the most recent month'}`
+              : 'No paid ads data available'
+            }
+          </p>
         </CardContent>
       </Card>
     )

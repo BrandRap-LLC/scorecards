@@ -6,7 +6,6 @@ import { WeeklyMetric } from '@/types/scorecards'
 import { formatCurrency, formatPercent, formatNumber } from '@/lib/utils'
 import { getHeatmapColor } from '@/lib/heatmap'
 import { Download, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
-import HeatmapLegend from '@/components/HeatmapLegend'
 
 interface WeeklyGridData {
   [companyId: number]: {
@@ -200,9 +199,6 @@ export default function GridPage() {
           </button>
         </div>
       </div>
-
-      {/* Heatmap Legend */}
-      <HeatmapLegend showInverted={true} className="mb-4" />
       
       {/* Filter Tabs */}
       <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">

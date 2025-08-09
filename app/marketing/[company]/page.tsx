@@ -7,7 +7,6 @@ import MetricsGrid from '@/components/marketing/MetricsGrid'
 import ChannelGrid from '@/components/marketing/ChannelGrid'
 import WeeklyMetricsGrid from '@/components/marketing/WeeklyMetricsGrid'
 import WeeklyChannelGrid from '@/components/marketing/WeeklyChannelGrid'
-import HeatmapLegend from '@/components/HeatmapLegend'
 import PaidChannelGrid from '@/components/PaidChannelGrid'
 import SEOChannelGrid from '@/components/SEOChannelGrid'
 
@@ -99,28 +98,8 @@ export default function MarketingDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-16 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Marketing Performance
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-700 mt-0.5 sm:mt-1">
-                {company.replace('.com', '').replace('.net', '').toUpperCase()}
-              </p>
-            </div>
-            
-            <div className="text-xs sm:text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">Period:</span> Mar - Aug 2025
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Tab Navigation */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b sticky top-16 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex" aria-label="Tabs">
             <button
@@ -204,7 +183,6 @@ export default function MarketingDashboard() {
             <MetricsGrid data={data} />
           ) : activeTab === 'channels' ? (
           <div className="space-y-4 sm:space-y-6">
-            <HeatmapLegend showInverted={true} />
             <ChannelGrid 
               data={data} 
               channelName="Google Ads" 
@@ -228,7 +206,6 @@ export default function MarketingDashboard() {
               <p className="text-xs sm:text-sm text-blue-800">Showing last 12 weeks of performance data</p>
             </div>
             <WeeklyMetricsGrid data={weeklyData} />
-            <HeatmapLegend showInverted={true} />
             <WeeklyChannelGrid 
               data={weeklyData} 
               channelName="Google Ads" 
@@ -251,7 +228,6 @@ export default function MarketingDashboard() {
               <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">Paid Ads by Campaign</h3>
               <p className="text-xs sm:text-sm text-blue-800">Campaign-level performance metrics across months</p>
             </div>
-            <HeatmapLegend showInverted={true} />
             <PaidChannelGrid clinic={company} />
           </div>
         ) : activeTab === 'seo' ? (
@@ -260,7 +236,6 @@ export default function MarketingDashboard() {
               <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">SEO Channels</h3>
               <p className="text-xs sm:text-sm text-blue-800">Organic and Local SEO performance metrics across months</p>
             </div>
-            <HeatmapLegend showInverted={true} />
             <SEOChannelGrid clinic={company} />
           </div>
         ) : null}

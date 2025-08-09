@@ -3,7 +3,6 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getHeatmapColor } from '@/lib/heatmap'
-import HeatmapLegend from '@/components/HeatmapLegend'
 import { Tooltip } from '@/components/ui/tooltip'
 import { CellTooltip } from '@/components/ui/cell-tooltip'
 import { metricDescriptions } from '@/lib/metric-descriptions'
@@ -158,7 +157,6 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
   
   return (
     <div className="space-y-4">
-      <HeatmapLegend showInverted={true} />
       <Card className="shadow-lg">
         <CardHeader className="bg-gray-50 border-b p-4 sm:p-6">
           <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">
