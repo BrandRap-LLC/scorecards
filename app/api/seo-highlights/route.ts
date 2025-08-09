@@ -2,15 +2,19 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {
-  // Check for required environment variables
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  // Use anon key which is available on client side
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Missing Supabase configuration:', {
+      hasUrl: !!supabaseUrl,
+      hasAnonKey: !!supabaseAnonKey
+    })
     return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  )
+  const supabase = createClient(supabaseUrl, supabaseAnonKey)
   const { searchParams } = new URL(request.url)
   const clinic = searchParams.get('clinic')
   
@@ -27,13 +31,30 @@ export async function GET(request: Request) {
       .order('current_rank', { ascending: true })
     
     if (error) {
-      console.error('Error fetching SEO highlights:', error)
-      return NextResponse.json({ error: 'Failed to fetch highlights' }, { status: 500 })
+      console.error('Supabase error:', error)
+      // If table doesn't exist, return a more helpful error
+      if (error.code === '42P01') {
+        return NextResponse.json({ 
+          error: 'Table not found', 
+          details: 'The seo_highlights_keyword_page_one table does not exist in the database',
+          code: error.code,
+          solution: 'Please create the table using the SQL script in SEO_HIGHLIGHTS_PRODUCTION_FIX.md'
+        }, { status: 500 })
+      }
+      return NextResponse.json({ 
+        error: 'Database error', 
+        details: error.message,
+        code: error.code 
+      }, { status: 500 })
     }
     
+    // Always return an array, even if empty
     return NextResponse.json(data || [])
   } catch (error) {
-    console.error('Error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Unexpected error:', error)
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
