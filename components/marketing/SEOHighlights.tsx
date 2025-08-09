@@ -33,9 +33,19 @@ export default function SEOHighlights({ clinic }: SEOHighlightsProps) {
     try {
       setLoading(true)
       const response = await fetch(`/api/seo-highlights?clinic=${clinic}`)
-      if (!response.ok) throw new Error('Failed to fetch highlights')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch highlights')
+      }
       
       const data = await response.json()
+      
+      // Check if we got an error response
+      if (data.error) {
+        console.error('API returned error:', data.error)
+        return
+      }
+      
       setHighlights(data)
     } catch (err) {
       console.error('Error fetching highlights:', err)
@@ -92,9 +102,12 @@ export default function SEOHighlights({ clinic }: SEOHighlightsProps) {
     return `${month} ${day}`
   }
 
-  // Get period info
-  const periodDate = highlights[0]?.period
-  const periodType = highlights[0]?.period_type
+  // Get the most recent period from the highlights
+  const sortedByPeriod = [...highlights].sort((a, b) => 
+    new Date(b.period).getTime() - new Date(a.period).getTime()
+  )
+  const periodDate = sortedByPeriod[0]?.period
+  const periodType = sortedByPeriod[0]?.period_type
 
   return (
     <div className="mb-6 space-y-4">

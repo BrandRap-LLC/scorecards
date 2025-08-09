@@ -19,31 +19,11 @@ export async function GET(request: Request) {
   }
   
   try {
-    // Get the most recent period for this clinic
-    const { data: periodData, error: periodError } = await supabase
-      .from('seo_highlights_keyword_page_one')
-      .select('period')
-      .eq('company_name', clinic)
-      .order('period', { ascending: false })
-      .limit(1)
-    
-    if (periodError) {
-      console.error('Error fetching period:', periodError)
-      return NextResponse.json({ error: 'Failed to fetch period' }, { status: 500 })
-    }
-    
-    if (!periodData || periodData.length === 0) {
-      return NextResponse.json([])
-    }
-    
-    const recentPeriod = periodData[0]
-    
-    // Get all highlights for the most recent period
+    // Get all highlights for this clinic
     const { data, error } = await supabase
       .from('seo_highlights_keyword_page_one')
       .select('*')
       .eq('company_name', clinic)
-      .eq('period', recentPeriod.period)
       .order('current_rank', { ascending: true })
     
     if (error) {
