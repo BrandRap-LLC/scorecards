@@ -4,7 +4,6 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getHeatmapColor } from '@/lib/heatmap'
 import { Tooltip } from '@/components/ui/tooltip'
-import { CellTooltip } from '@/components/ui/cell-tooltip'
 import { metricDescriptions } from '@/lib/metric-descriptions'
 
 interface ChannelGridProps {
@@ -276,18 +275,12 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
                       return (
                         <tr key={`${groupIndex}-${metricIndex}`} className="divide-x divide-gray-100">
                           <td className="sticky left-0 z-10 bg-white px-2 sm:px-3 py-2 sm:py-3 text-xs text-gray-800 shadow-r">
-                            {metricDescriptions[metric.key] ? (
-                              <CellTooltip content={metricDescriptions[metric.key]} className="h-full w-full">
-                                <div className="flex items-center cursor-help">
-                                  <span className="truncate pr-1">{metric.label}</span>
-                                  <Tooltip content={metricDescriptions[metric.key]} />
-                                </div>
-                              </CellTooltip>
-                            ) : (
-                              <div className="flex items-center">
-                                <span className="truncate pr-1">{metric.label}</span>
-                              </div>
-                            )}
+                            <div className="flex items-center">
+                              <span className="truncate pr-1">{metric.label}</span>
+                              {metricDescriptions[metric.key] && (
+                                <Tooltip content={metricDescriptions[metric.key]} />
+                              )}
+                            </div>
                           </td>
                           {months.map((month, monthIndex) => {
                             const value = getValue(metric.key, month)
