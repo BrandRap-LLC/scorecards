@@ -62,20 +62,32 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
   // Get current month for highlighting
   const currentMonth = allMonths[0] // Most recent month in data
 
-  // Get unique campaigns that have impressions > 1 in the most recent month
-  const campaignsWithRecentImpressions = data
+  // Get campaigns with impressions > 1 in the most recent month and their spend
+  const campaignsWithRecentData = data
     .filter(row => 
       row.month === currentMonth && 
       row.impressions !== null && 
-      row.impressions > 1
+      row.impressions > 1 &&
+      row.campaign !== null &&
+      row.campaign !== undefined &&
+      row.campaign !== 'unknown campaign'
     )
-    .map(row => row.campaign)
-    .filter((campaign): campaign is string => campaign !== null && campaign !== undefined)
-
-  // Get unique campaigns and sort them, filtering by recent impressions
-  const campaigns = [...new Set(campaignsWithRecentImpressions)]
-    .filter(campaign => campaign !== 'unknown campaign')
-    .sort()
+  
+  // Create a map of campaign to spend for sorting
+  const campaignSpendMap = new Map<string, number>()
+  campaignsWithRecentData.forEach(row => {
+    if (row.campaign) {
+      campaignSpendMap.set(row.campaign, (row.spend || 0))
+    }
+  })
+  
+  // Get unique campaigns sorted by spend (highest to lowest)
+  const campaigns = [...new Set(campaignsWithRecentData.map(row => row.campaign!))]
+    .sort((a, b) => {
+      const spendA = campaignSpendMap.get(a) || 0
+      const spendB = campaignSpendMap.get(b) || 0
+      return spendB - spendA // Sort descending by spend
+    })
 
   // Process each campaign separately
   const campaignGrids = campaigns.map(campaign => {
@@ -177,15 +189,23 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
       return null
     }
     
+    // Get the most recent month's spend for this campaign
+    const recentMonthSpend = campaignSpendMap.get(campaign) || 0
+    
     return (
       <Card key={campaign} className="shadow-lg">
         <CardHeader className="bg-gray-50 border-b p-3 sm:p-6">
-          <CardTitle className="text-sm sm:text-lg lg:text-xl text-gray-900">
-            {campaign}
-            <span className="block sm:inline text-xs sm:text-sm font-normal text-gray-600 mt-1 sm:mt-0 sm:ml-2">
-              ({trafficSource === 'google ads' ? 'Google Ads' : trafficSource === 'social ads' ? 'Social Ads' : 'Paid Campaign'})
+          <div className="flex items-start justify-between">
+            <CardTitle className="text-sm sm:text-lg lg:text-xl text-gray-900">
+              {campaign}
+              <span className="block sm:inline text-xs sm:text-sm font-normal text-gray-600 mt-1 sm:mt-0 sm:ml-2">
+                ({trafficSource === 'google ads' ? 'Google Ads' : trafficSource === 'social ads' ? 'Social Ads' : 'Paid Campaign'})
+              </span>
+            </CardTitle>
+            <span className="text-sm font-semibold text-gray-700 ml-4">
+              ${recentMonthSpend.toLocaleString('en-US', { maximumFractionDigits: 0 })}
             </span>
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto -mx-px">
