@@ -23,6 +23,7 @@ interface SEOHighlightsProps {
 export default function SEOHighlights({ clinic }: SEOHighlightsProps) {
   const [highlights, setHighlights] = useState<SEOHighlight[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<string>('all')
 
   useEffect(() => {
@@ -32,23 +33,30 @@ export default function SEOHighlights({ clinic }: SEOHighlightsProps) {
   const fetchHighlights = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/seo-highlights?clinic=${clinic}`)
+      setError(null)
+      const url = `/api/seo-highlights?clinic=${encodeURIComponent(clinic)}`
+      console.log('Fetching SEO highlights from:', url)
+      
+      const response = await fetch(url)
       
       if (!response.ok) {
-        throw new Error('Failed to fetch highlights')
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
       
       const data = await response.json()
       
       // Check if we got an error response
       if (data.error) {
-        console.error('API returned error:', data.error)
+        console.error('API returned error:', data.error, data.details)
+        setError(data.details || data.error)
         return
       }
       
       setHighlights(data)
+      console.log(`SEO Highlights loaded: ${data.length} items for ${clinic}`)
     } catch (err) {
       console.error('Error fetching highlights:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load SEO highlights')
     } finally {
       setLoading(false)
     }
@@ -73,7 +81,31 @@ export default function SEOHighlights({ clinic }: SEOHighlightsProps) {
     )
   }
 
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="mb-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader>
+            <CardTitle className="text-red-800">Failed to Load SEO Highlights</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-600">{error}</p>
+            <button 
+              onClick={() => fetchHighlights()}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Try Again
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Don't show anything if there are no highlights (but log it)
   if (highlights.length === 0) {
+    console.log(`No SEO highlights found for ${clinic}`)
     return null
   }
 
