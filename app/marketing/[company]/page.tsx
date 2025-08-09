@@ -30,6 +30,21 @@ const COMPANIES = [
   'skinjectables.com'
 ]
 
+// Company display names for better formatting
+const COMPANY_DISPLAY_NAMES: Record<string, string> = {
+  'advancedlifeclinic.com': 'Advanced Life Clinic',
+  'alluraderm.com': 'Alluraderm',
+  'bismarckbotox.com': 'Bismarck Botox',
+  'drridha.com': 'Dr. Ridha',
+  'genesis-medspa.com': 'Genesis Med Spa',
+  'greenspringaesthetics.com': 'Green Spring Aesthetics',
+  'kovakcosmeticcenter.com': 'Kovak Cosmetic Center',
+  'mirabilemd.com': 'Mirabile MD',
+  'myskintastic.com': 'My Skintastic',
+  'skincareinstitute.net': 'Skin Care Institute',
+  'skinjectables.com': 'Skinjectables'
+}
+
 export default function MarketingDashboard() {
   const params = useParams()
   const company = params.company as string
@@ -101,7 +116,8 @@ export default function MarketingDashboard() {
       {/* Tab Navigation */}
       <div className="bg-white border-b sticky top-16 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-          <nav className="flex overflow-x-auto scrollbar-hide" aria-label="Tabs">
+          <div className="flex items-center justify-between">
+            <nav className="flex overflow-x-auto scrollbar-hide flex-1" aria-label="Tabs">
             <button
               onClick={() => {
                 setIsTransitioning(true)
@@ -172,7 +188,19 @@ export default function MarketingDashboard() {
             >
               SEO
             </button>
-          </nav>
+            </nav>
+            <div className="hidden sm:flex items-center px-4 py-3 border-l border-gray-200">
+              <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                {COMPANY_DISPLAY_NAMES[company] || company}
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* Mobile Company Name */}
+        <div className="sm:hidden bg-gray-50 px-2 py-2 border-t border-gray-200">
+          <span className="text-xs font-medium text-gray-700">
+            {COMPANY_DISPLAY_NAMES[company] || company}
+          </span>
         </div>
       </div>
 
