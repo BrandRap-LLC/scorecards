@@ -112,8 +112,7 @@ export default function Home() {
                   <p className="text-xs sm:text-sm text-gray-600 truncate">
                     {company.id}
                   </p>
-                  <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs">
-                    <span className="text-gray-600">{company.recordCount} data points</span>
+                  <div className="mt-3 sm:mt-4 flex items-center justify-end text-xs">
                     <span className="text-green-600 font-semibold">Active</span>
                   </div>
                 </CardContent>
