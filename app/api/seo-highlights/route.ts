@@ -20,17 +20,23 @@ export async function GET(request: Request) {
   
   try {
     // Get the most recent period for this clinic
-    const { data: recentPeriod, error: periodError } = await supabase
+    const { data: periodData, error: periodError } = await supabase
       .from('seo_highlights_keyword_page_one')
       .select('period')
       .eq('company_name', clinic)
       .order('period', { ascending: false })
       .limit(1)
-      .single()
     
-    if (periodError || !recentPeriod) {
+    if (periodError) {
+      console.error('Error fetching period:', periodError)
+      return NextResponse.json({ error: 'Failed to fetch period' }, { status: 500 })
+    }
+    
+    if (!periodData || periodData.length === 0) {
       return NextResponse.json([])
     }
+    
+    const recentPeriod = periodData[0]
     
     // Get all highlights for the most recent period
     const { data, error } = await supabase
