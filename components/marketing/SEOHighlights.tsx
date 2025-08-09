@@ -110,59 +110,7 @@ export default function SEOHighlights({ clinic }: SEOHighlightsProps) {
   const periodType = sortedByPeriod[0]?.period_type
 
   return (
-    <div className="mb-6 space-y-4">
-      {/* Header Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-green-600 font-medium">Total Keywords</p>
-                <p className="text-2xl font-bold text-green-800">{filteredHighlights.length}</p>
-              </div>
-              <Target className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-purple-600 font-medium">Top 3 Rankings</p>
-                <p className="text-2xl font-bold text-purple-800">{topRankings}</p>
-              </div>
-              <Trophy className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-blue-600 font-medium">Avg. Improvement</p>
-                <p className="text-2xl font-bold text-blue-800">+{avgImprovement.toFixed(1)}</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-amber-600 font-medium">Period</p>
-                <p className="text-lg font-bold text-amber-800">{formatDate(periodDate)}</p>
-                <p className="text-xs text-amber-600 capitalize">{periodType}</p>
-              </div>
-              <Calendar className="h-8 w-8 text-amber-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
+    <div className="mb-6">
       {/* Main Highlights Card */}
       <Card className="shadow-lg">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 border-b">
@@ -195,7 +143,7 @@ export default function SEOHighlights({ clinic }: SEOHighlightsProps) {
 
         <CardContent className="p-4 sm:p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {filteredHighlights.slice(0, 9).map((highlight) => {
+            {filteredHighlights.map((highlight) => {
               const improvement = highlight.baseline_avg_rank - highlight.current_rank
               const isTopRank = highlight.current_rank <= 3
               const isNumber1 = highlight.current_rank === 1
@@ -265,14 +213,6 @@ export default function SEOHighlights({ clinic }: SEOHighlightsProps) {
               )
             })}
           </div>
-
-          {filteredHighlights.length > 9 && (
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600">
-                And {filteredHighlights.length - 9} more keyword improvements
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
