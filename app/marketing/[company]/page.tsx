@@ -262,6 +262,10 @@ export default function MarketingDashboard() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
               <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">Paid Ads by Campaign</h3>
               <p className="text-xs sm:text-sm text-blue-800">Campaign-level performance metrics across months</p>
+              <p className="text-xs text-blue-700 mt-2">
+                <span className="font-medium">Note:</span> Leads data is aggregated at the traffic source level. 
+                For campaign-specific leads metrics, please refer to the Channels tab.
+              </p>
             </div>
             <PaidChannelGrid clinic={company} />
           </div>
