@@ -52,126 +52,235 @@ export default function SEOChannelGrid({ clinic }: SEOChannelGridProps) {
     )
   }
 
-  // Get unique months and sort them (newest first)
-  const months = [...new Set(data.map(row => row.month))]
+  // Get unique traffic sources and sort them
+  const trafficSources = [...new Set(data.map(row => row.traffic_source))]
+    .sort()
+
+  // Get ALL unique months from ALL data (not per channel) and sort them (newest first)
+  const allMonths = [...new Set(data.map(row => row.month))]
     .sort()
     .reverse()
     .slice(0, 6) // Get latest 6 months
   
   // Get current month for highlighting
-  const currentMonth = months[0] // Most recent month in data
-  
-  // Get unique traffic sources
-  const trafficSources = [...new Set(data.map(row => row.traffic_source))]
-    .sort()
-  
-  // Group data by traffic source and month
-  const sourceData: Record<string, Record<string, SeoChannelsRecord>> = {}
-  
-  trafficSources.forEach(source => {
-    sourceData[source] = {}
+  const currentMonth = allMonths[0] // Most recent month in data
+
+  // Process each traffic source separately
+  const channelGrids = trafficSources.map(source => {
+    // Filter data for this specific traffic source
+    const sourceData = data.filter(row => row.traffic_source === source)
+    
+    // Use the consistent months from all data
+    const months = allMonths
+    
+    // Create monthly data map - one record per month for this source
+    const monthlyData: Record<string, SeoChannelsRecord | null> = {}
+    
     months.forEach(month => {
-      const record = data.find(row => row.traffic_source === source && row.month === month)
-      if (record) {
-        sourceData[source][month] = record
+      const monthRecord = sourceData.find(row => row.month === month)
+      monthlyData[month] = monthRecord || null
+    })
+    
+    // Format month for display
+    const formatMonth = (month: string) => {
+      const date = new Date(month)
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      return `${monthNames[date.getMonth()]} ${date.getFullYear()}`
+    }
+    
+    // Format value based on metric type - matching ChannelGrid formatting
+    const formatValue = (metric: string, value: number | null) => {
+      if (value === null || value === undefined) return '-'
+      
+      // Currency metrics - no decimals
+      if (metric.includes('revenue') || metric.includes('rev')) {
+        return '$' + value.toLocaleString('en-US', { 
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0 
+        })
       }
-    })
+      
+      // CTR and rate metrics (stored as decimals in seo_channels)
+      if (metric === 'ctr' || metric.includes('rate')) {
+        return (value * 100).toFixed(1) + '%'
+      }
+      
+      // Large numbers - use K/M notation
+      if (value >= 1000000) {
+        return (value / 1000000).toFixed(1) + 'M'
+      } else if (value >= 10000) {
+        return (value / 1000).toFixed(0) + 'K'
+      }
+      
+      // Default: show as integer with commas
+      return Math.round(value).toLocaleString()
+    }
+    
+    // Define metric groups - using all fields from seo_channels table
+    const metricGroups = [
+      {
+        title: 'Traffic & Engagement',
+        metrics: [
+          { key: 'impressions', label: 'Impressions' },
+          { key: 'visits', label: 'Visits' },
+          { key: 'ctr', label: 'Click-Through Rate' }
+        ]
+      },
+      {
+        title: 'Appointments',
+        metrics: [
+          { key: 'total_appointments', label: 'Total Appointments' },
+          { key: 'new_appointments', label: 'New Appointments' },
+          { key: 'returning_appointments', label: 'Returning Appointments' },
+          { key: 'appointment_rate', label: 'Appointment Rate' }
+        ]
+      },
+      {
+        title: 'Conversations',
+        metrics: [
+          { key: 'total_conversations', label: 'Total Conversations' },
+          { key: 'new_conversations', label: 'New Conversations' },
+          { key: 'returning_conversations', label: 'Returning Conversations' },
+          { key: 'conversation_rate', label: 'Conversation Rate' }
+        ]
+      },
+      {
+        title: 'Revenue',
+        metrics: [
+          { key: 'appointment_est_revenue', label: 'Appointment Est. Revenue' },
+          { key: 'new_appointment_est_6m_revenue', label: 'New Appointment 6M Revenue' },
+          { key: 'avg_appointment_rev', label: 'Avg Appointment Revenue' }
+        ]
+      }
+    ]
+    
+    // Get value for a specific metric and month
+    const getValue = (metricKey: string, month: string) => {
+      const record = monthlyData[month]
+      return record ? record[metricKey as keyof SeoChannelsRecord] : null
+    }
+    
+    // Get all values for a metric across all months (for heatmap)
+    const getMetricValues = (metricKey: string) => {
+      return months.map(month => getValue(metricKey, month)).filter(v => v !== null) as number[]
+    }
+    
+    // Only show if there's data
+    if (months.length === 0) {
+      return null
+    }
+    
+    // Format channel name
+    const formatChannelName = (source: string) => {
+      if (source === 'local seo') return 'Local SEO'
+      if (source === 'organic seo') return 'Organic SEO'
+      return source
+    }
+    
+    return (
+      <Card key={source} className="shadow-lg">
+        <CardHeader className="bg-gray-50 border-b p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">
+            {formatChannelName(source)}
+            <span className="block sm:inline text-sm font-normal text-gray-600 mt-1 sm:mt-0 sm:ml-2">
+              (SEO Channel)
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto -mx-px">
+            <div className="inline-block min-w-full align-middle">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr className="divide-x divide-gray-200">
+                    <th className="sticky left-0 z-10 bg-white text-left px-3 py-3 text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wider min-w-[120px] sm:min-w-[200px] shadow-r">
+                      Metric
+                    </th>
+                    {months.map(month => (
+                      <th 
+                        key={month} 
+                        className={`text-right px-3 py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider min-w-[80px] sm:min-w-[100px] whitespace-nowrap border-l border-gray-200 ${
+                          month === currentMonth 
+                            ? 'bg-blue-50 text-blue-900' 
+                            : 'text-gray-700'
+                        }`}
+                      >
+                        <span className="hidden sm:inline">{formatMonth(month)}</span>
+                        <span className="sm:hidden">{formatMonth(month).split(' ')[0]}</span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {metricGroups.map((group, groupIndex) => (
+                    <React.Fragment key={groupIndex}>
+                      {groupIndex > 0 && (
+                        <tr className="h-2 bg-gray-100">
+                          <td colSpan={months.length + 1}></td>
+                        </tr>
+                      )}
+                      <tr className="bg-gradient-to-r from-gray-100 to-gray-50">
+                        <td colSpan={months.length + 1} className="px-3 py-2.5 text-xs sm:text-sm font-semibold text-gray-800 border-l-4 border-gray-400">
+                          {group.title}
+                        </td>
+                      </tr>
+                      {group.metrics.map((metric, metricIndex) => {
+                        const allValues = getMetricValues(metric.key)
+                        
+                        return (
+                          <tr key={`${groupIndex}-${metricIndex}`} className="divide-x divide-gray-100">
+                            <td className="sticky left-0 z-10 bg-white px-3 py-3 text-xs sm:text-sm text-gray-800 shadow-r">
+                              <div className="flex items-center">
+                                <span className="truncate pr-1">{metric.label}</span>
+                                {metricDescriptions[metric.key] && (
+                                  <Tooltip content={metricDescriptions[metric.key]} />
+                                )}
+                              </div>
+                            </td>
+                            {months.map((month, monthIndex) => {
+                              const value = getValue(metric.key, month)
+                              const numericValue = typeof value === 'number' ? value : null
+                              const { bgColor, textColor } = getHeatmapColor(
+                                numericValue,
+                                allValues,
+                                metric.key
+                              )
+                              
+                              return (
+                                <td 
+                                  key={month} 
+                                  className={`relative text-right px-3 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group ${bgColor} ${
+                                    month === currentMonth ? 'font-bold' : ''
+                                  }`}
+                                  title={value !== null ? `${metric.label}: ${value}` : 'No data'}
+                                >
+                                  <span className={textColor}>
+                                    {formatValue(metric.key, numericValue)}
+                                  </span>
+                                  {/* Hover overlay with exact value */}
+                                  {numericValue !== null && (
+                                    <div className="absolute inset-0 bg-gray-900 bg-opacity-90 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                      {numericValue.toLocaleString()}
+                                    </div>
+                                  )}
+                                </td>
+                              )
+                            })}
+                          </tr>
+                        )
+                      })}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
   })
-  
-  // Format month for display
-  const formatMonth = (month: string) => {
-    const date = new Date(month)
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    return `${monthNames[date.getMonth()]} ${date.getFullYear()}`
-  }
-  
-  // Format value based on metric type
-  const formatValue = (metric: string, value: number | null) => {
-    if (value === null || value === undefined) return '-'
-    
-    // Currency metrics
-    if (metric.includes('revenue') || metric.includes('rev')) {
-      return '$' + value.toLocaleString('en-US', { 
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0 
-      })
-    }
-    
-    // CTR and rates (stored as decimals, show as percentage)
-    if (metric === 'ctr' || metric.includes('rate')) {
-      return (value * 100).toFixed(1) + '%'
-    }
-    
-    // Large numbers - use K/M notation
-    if (value >= 1000000) {
-      return (value / 1000000).toFixed(1) + 'M'
-    } else if (value >= 10000) {
-      return (value / 1000).toFixed(0) + 'K'
-    }
-    
-    // Default: show as integer with commas
-    return Math.round(value).toLocaleString()
-  }
-  
-  // Define metric groups similar to ChannelGrid
-  const metricGroups = [
-    {
-      title: 'Traffic & Engagement',
-      metrics: [
-        { key: 'impressions', label: 'Impressions' },
-        { key: 'visits', label: 'Visits' },
-        { key: 'ctr', label: 'Click-Through Rate' }
-      ]
-    },
-    {
-      title: 'Appointments',
-      metrics: [
-        { key: 'total_appointments', label: 'Total Appointments' },
-        { key: 'new_appointments', label: 'New Appointments' },
-        { key: 'returning_appointments', label: 'Returning Appointments' },
-        { key: 'appointment_rate', label: 'Appointment Rate' }
-      ]
-    },
-    {
-      title: 'Conversations',
-      metrics: [
-        { key: 'total_conversations', label: 'Total Conversations' },
-        { key: 'new_conversations', label: 'New Conversations' },
-        { key: 'returning_conversations', label: 'Returning Conversations' },
-        { key: 'conversation_rate', label: 'Conversation Rate' }
-      ]
-    },
-    {
-      title: 'Revenue',
-      metrics: [
-        { key: 'appointment_est_revenue', label: 'Est. Revenue' },
-        { key: 'new_appointment_est_6m_revenue', label: '6M Revenue' },
-        { key: 'avg_appointment_rev', label: 'Avg Appointment Rev' }
-      ]
-    }
-  ]
-  
-  // Get value for a specific metric and month for a source
-  const getValue = (source: string, metricKey: string, month: string) => {
-    const record = sourceData[source]?.[month]
-    return record ? record[metricKey as keyof SeoChannelsRecord] as number | null : null
-  }
-  
-  // Get all values for a metric across all sources and months (for heatmap)
-  const getMetricValues = (metricKey: string) => {
-    const values: number[] = []
-    trafficSources.forEach(source => {
-      months.forEach(month => {
-        const value = getValue(source, metricKey, month)
-        if (value !== null && value !== undefined) {
-          values.push(value as number)
-        }
-      })
-    })
-    return values
-  }
-  
-  if (months.length === 0 || trafficSources.length === 0) {
+
+  if (trafficSources.length === 0) {
     return (
       <Card className="shadow-lg">
         <CardHeader className="bg-gray-50 border-b">
@@ -183,94 +292,10 @@ export default function SEOChannelGrid({ clinic }: SEOChannelGridProps) {
       </Card>
     )
   }
-  
+
   return (
-    <div className="space-y-6">
-      {metricGroups.map((group, groupIndex) => (
-        <Card key={groupIndex} className="shadow-lg">
-          <CardHeader className="bg-gray-50 border-b p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg text-gray-900">
-              {group.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto -mx-px">
-              <div className="inline-block min-w-full align-middle">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr className="divide-x divide-gray-200">
-                      <th className="sticky left-0 z-10 bg-white text-left px-3 py-3 text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wider min-w-[150px] shadow-r">
-                        Channel
-                      </th>
-                      {months.map(month => (
-                        <th 
-                          key={month} 
-                          className={`text-right px-3 py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider min-w-[100px] whitespace-nowrap border-l border-gray-200 ${
-                            month === currentMonth 
-                              ? 'bg-blue-50 text-blue-900' 
-                              : 'text-gray-700'
-                          }`}
-                        >
-                          <span className="hidden sm:inline">{formatMonth(month)}</span>
-                          <span className="sm:hidden">{formatMonth(month).split(' ')[0]}</span>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
-                    {group.metrics.map((metric, metricIndex) => {
-                      const allValues = getMetricValues(metric.key)
-                      
-                      return (
-                        <React.Fragment key={metricIndex}>
-                          <tr className="bg-gradient-to-r from-gray-100 to-gray-50">
-                            <td colSpan={months.length + 1} className="px-3 py-2 text-xs sm:text-sm font-semibold text-gray-800">
-                              <div className="flex items-center">
-                                <span>{metric.label}</span>
-                                {metricDescriptions[metric.key] && (
-                                  <Tooltip content={metricDescriptions[metric.key]} />
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                          {trafficSources.map((source, sourceIndex) => (
-                            <tr key={`${metricIndex}-${sourceIndex}`} className="divide-x divide-gray-100 hover:bg-gray-50">
-                              <td className="sticky left-0 z-10 bg-white px-3 py-3 text-xs sm:text-sm text-gray-800 shadow-r capitalize">
-                                {source.replace('seo', 'SEO')}
-                              </td>
-                              {months.map(month => {
-                                const value = getValue(source, metric.key, month)
-                                const { bgColor, textColor } = getHeatmapColor(
-                                  value,
-                                  allValues,
-                                  metric.key
-                                )
-                                
-                                return (
-                                  <td 
-                                    key={month} 
-                                    className={`relative text-right px-3 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group ${bgColor} ${
-                                      month === currentMonth ? 'font-bold' : ''
-                                    }`}
-                                  >
-                                    <span className={textColor}>
-                                      {formatValue(metric.key, value)}
-                                    </span>
-                                  </td>
-                                )
-                              })}
-                            </tr>
-                          ))}
-                        </React.Fragment>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="space-y-4 sm:space-y-6">
+      {channelGrids}
     </div>
   )
 }

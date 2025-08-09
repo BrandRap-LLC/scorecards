@@ -57,19 +57,22 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
     .filter((campaign): campaign is string => campaign !== null && campaign !== undefined && campaign !== 'unknown campaign')
     .sort()
 
+  // Get ALL unique months from ALL data (not per campaign) and sort them (newest first)
+  const allMonths = [...new Set(data.map(row => row.month))]
+    .sort()
+    .reverse()
+    .slice(0, 6) // Get latest 6 months
+  
+  // Get current month for highlighting
+  const currentMonth = allMonths[0] // Most recent month in data
+
   // Process each campaign separately
   const campaignGrids = campaigns.map(campaign => {
     // Filter data for this specific campaign
     const campaignData = data.filter(row => row.campaign === campaign)
     
-    // Get unique months for this campaign and sort them (newest first)
-    const months = [...new Set(campaignData.map(row => row.month))]
-      .sort()
-      .reverse()
-      .slice(0, 6) // Get latest 6 months
-    
-    // Get current month for highlighting
-    const currentMonth = months[0] // Most recent month in data
+    // Use the consistent months from all data
+    const months = allMonths
     
     // Create monthly data map - one record per month for this campaign
     const monthlyData: Record<string, PaidAdsRecord | null> = {}
