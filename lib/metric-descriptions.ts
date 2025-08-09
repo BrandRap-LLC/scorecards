@@ -1,11 +1,11 @@
 // Metric descriptions for tooltips
 export const metricDescriptions: Record<string, string> = {
   // Traffic & Engagement
-  'impressions': 'Number of times ads were displayed to users',
+  'impressions': 'Number of times content was displayed to users (includes paid and organic traffic channels)',
   'visits': 'Number of unique visitors to the website',
-  'leads': 'All leads generated (new + returning)',
-  'new_leads': 'Total leads from first-time prospects',
-  'returning_leads': 'Total leads from existing patients',
+  'leads': 'People contacting the clinic for the first time (calls, forms, or online bookings)',
+  'new_leads': 'People contacting the clinic for the first time (calls, forms, or online bookings)',
+  'returning_leads': 'Existing patients making new contact (calls, forms, or online bookings)',
   
   // Conversion Metrics
   'total_conversion': 'Overall percentage of leads that booked appointments',
@@ -25,6 +25,8 @@ export const metricDescriptions: Record<string, string> = {
   'spend': 'Total amount spent on paid advertising campaigns',
   'total_estimated_revenue': 'Total estimated revenue (new + returning patients)',
   'new_estimated_revenue': 'Estimated revenue generated from new patients',
+  'appointment_est_revenue': 'Estimated revenue from appointments (total appointments × average revenue per appointment)',
+  'new_appointment_est_6m_revenue': 'Projected 6-month revenue from new patients (new appointments × average revenue per appointment × 2)',
   
   // ROI Metrics
   'total_roas': 'Overall return on ad spend (new + returning customers)',
@@ -33,5 +35,9 @@ export const metricDescriptions: Record<string, string> = {
   'cac_new': 'Average cost to acquire one new customer',
   
   // Lifetime Value
-  'estimated_ltv_6m': 'Predicted customer lifetime value over 6 months'
+  'estimated_ltv_6m': 'Predicted customer lifetime value over 6 months',
+  
+  // Additional Metrics
+  'appointment_rate': 'Percentage of visits that result in booked appointments',
+  'ctr': 'Click-through rate - percentage of impressions that result in clicks/visits'
 };

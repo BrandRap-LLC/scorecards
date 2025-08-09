@@ -4,6 +4,7 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getHeatmapColor } from '@/lib/heatmap'
 import { Tooltip } from '@/components/ui/tooltip'
+import { CellTooltip } from '@/components/ui/cell-tooltip'
 import { metricDescriptions } from '@/lib/metric-descriptions'
 
 interface ChannelGridProps {
@@ -45,9 +46,6 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       new_appointments: 0,
       returning_appointments: 0,
       online_booking: 0,
-      total_conversations: 0,
-      new_conversations: 0,
-      returning_conversations: 0,
       spend: 0,
       total_estimated_revenue: 0,
       new_estimated_revenue: 0,
@@ -71,9 +69,6 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       monthlyTotals[month].new_appointments += record.new_appointments || 0
       monthlyTotals[month].returning_appointments += record.returning_appointments || 0
       monthlyTotals[month].online_booking += record.online_booking || 0
-      monthlyTotals[month].total_conversations += record.total_conversations || 0
-      monthlyTotals[month].new_conversations += record.new_conversations || 0
-      monthlyTotals[month].returning_conversations += record.returning_conversations || 0
       monthlyTotals[month].spend += record.spend || 0
       monthlyTotals[month].total_estimated_revenue += record.total_estimated_revenue || 0
       monthlyTotals[month].new_estimated_revenue += record.new_estimated_revenue || 0
@@ -113,8 +108,13 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
       return value.toFixed(2)
     }
     
-    // Percentage metrics (already in percentage form from DB)
-    if (metric.includes('conversion') || metric.includes('rate')) {
+    // Conversion metrics (stored as decimals, need to multiply by 100)
+    if (metric.includes('conversion')) {
+      return Math.round(value * 100) + '%'
+    }
+    
+    // Other rate metrics (already in percentage form from DB)
+    if (metric.includes('rate')) {
       return value.toFixed(1) + '%'
     }
     
@@ -151,14 +151,6 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
         { key: 'new_appointments', label: 'New Appointments' },
         { key: 'returning_appointments', label: 'Returning Appointments' },
         { key: 'online_booking', label: 'Online Bookings' }
-      ]
-    },
-    {
-      title: 'Conversations',
-      metrics: [
-        { key: 'total_conversations', label: 'Total Conversations' },
-        { key: 'new_conversations', label: 'New Conversations' },
-        { key: 'returning_conversations', label: 'Returning Conversations' }
       ]
     },
     {
@@ -265,12 +257,18 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
                       return (
                         <tr key={`${groupIndex}-${metricIndex}`} className="divide-x divide-gray-100">
                           <td className="sticky left-0 z-10 bg-white px-3 py-3 text-xs sm:text-sm text-gray-800 shadow-r">
-                            <div className="flex items-center">
-                              <span className="truncate pr-1">{metric.label}</span>
-                              {metricDescriptions[metric.key] && (
-                                <Tooltip content={metricDescriptions[metric.key]} />
-                              )}
-                            </div>
+                            {metricDescriptions[metric.key] ? (
+                              <CellTooltip content={metricDescriptions[metric.key]} className="h-full w-full">
+                                <div className="flex items-center cursor-help">
+                                  <span className="truncate pr-1">{metric.label}</span>
+                                  <Tooltip content={metricDescriptions[metric.key]} />
+                                </div>
+                              </CellTooltip>
+                            ) : (
+                              <div className="flex items-center">
+                                <span className="truncate pr-1">{metric.label}</span>
+                              </div>
+                            )}
                           </td>
                           {months.map((month, monthIndex) => {
                             const value = getValue(metric.key, month)
@@ -283,7 +281,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
                             return (
                               <td 
                                 key={month} 
-                                className={`relative text-right px-3 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group ${bgColor} ${
+                                className={`relative text-right px-3 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group cursor-pointer ${bgColor} ${
                                   month === currentMonth ? 'font-bold' : ''
                                 }`}
                                 title={value !== null ? `${metric.label}: ${value}` : 'No data'}

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getHeatmapColor } from '@/lib/heatmap'
 import { Tooltip } from '@/components/ui/tooltip'
+import { CellTooltip } from '@/components/ui/cell-tooltip'
 import { metricDescriptions } from '@/lib/metric-descriptions'
 import { PaidAdsRecord } from '@/lib/api-paid-seo'
 
@@ -133,8 +134,7 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
         metrics: [
           { key: 'spend', label: 'Ad Spend' },
           { key: 'appointment_est_revenue', label: 'Appointment Est. Revenue' },
-          { key: 'new_appointment_est_6m_revenue', label: 'New Appointment 6M Revenue' },
-          { key: 'avg_appointment_rev', label: 'Avg Appointment Revenue' }
+          { key: 'new_appointment_est_6m_revenue', label: 'New Appointment 6M Revenue' }
         ]
       },
       {
@@ -144,15 +144,6 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
           { key: 'new_appointments', label: 'New Appointments' },
           { key: 'returning_appointments', label: 'Returning Appointments' },
           { key: 'appointment_rate', label: 'Appointment Rate' }
-        ]
-      },
-      {
-        title: 'Conversations',
-        metrics: [
-          { key: 'total_conversations', label: 'Total Conversations' },
-          { key: 'new_conversations', label: 'New Conversations' },
-          { key: 'returning_conversations', label: 'Returning Conversations' },
-          { key: 'conversation_rate', label: 'Conversation Rate' }
         ]
       }
     ]
@@ -226,12 +217,18 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
                         return (
                           <tr key={`${groupIndex}-${metricIndex}`} className="divide-x divide-gray-100">
                             <td className="sticky left-0 z-10 bg-white px-3 py-3 text-xs sm:text-sm text-gray-800 shadow-r">
-                              <div className="flex items-center">
-                                <span className="truncate pr-1">{metric.label}</span>
-                                {metricDescriptions[metric.key] && (
-                                  <Tooltip content={metricDescriptions[metric.key]} />
-                                )}
-                              </div>
+                              {metricDescriptions[metric.key] ? (
+                                <CellTooltip content={metricDescriptions[metric.key]} className="h-full w-full">
+                                  <div className="flex items-center cursor-help">
+                                    <span className="truncate pr-1">{metric.label}</span>
+                                    <Tooltip content={metricDescriptions[metric.key]} />
+                                  </div>
+                                </CellTooltip>
+                              ) : (
+                                <div className="flex items-center">
+                                  <span className="truncate pr-1">{metric.label}</span>
+                                </div>
+                              )}
                             </td>
                             {months.map((month, monthIndex) => {
                               const value = getValue(metric.key, month)
@@ -245,7 +242,7 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
                               return (
                                 <td 
                                   key={month} 
-                                  className={`relative text-right px-3 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group ${bgColor} ${
+                                  className={`relative text-right px-3 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group cursor-pointer ${bgColor} ${
                                     month === currentMonth ? 'font-bold' : ''
                                   }`}
                                   title={value !== null ? `${metric.label}: ${value}` : 'No data'}

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getHeatmapColor } from '@/lib/heatmap'
 import HeatmapLegend from '@/components/HeatmapLegend'
 import { Tooltip } from '@/components/ui/tooltip'
+import { CellTooltip } from '@/components/ui/cell-tooltip'
 import { metricDescriptions } from '@/lib/metric-descriptions'
 
 interface WeeklyMetricsGridProps {
@@ -38,9 +39,6 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
       new_appointments: 0,
       returning_appointments: 0,
       online_booking: 0,
-      total_conversations: 0,
-      new_conversations: 0,
-      returning_conversations: 0,
       spend: 0,
       total_estimated_revenue: 0,
       new_estimated_revenue: 0,
@@ -59,9 +57,6 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
       weeklyTotals[week].new_appointments += record.new_appointments || 0
       weeklyTotals[week].returning_appointments += record.returning_appointments || 0
       weeklyTotals[week].online_booking += record.online_booking || 0
-      weeklyTotals[week].total_conversations += record.total_conversations || 0
-      weeklyTotals[week].new_conversations += record.new_conversations || 0
-      weeklyTotals[week].returning_conversations += record.returning_conversations || 0
       weeklyTotals[week].spend += record.spend || 0
       weeklyTotals[week].total_estimated_revenue += record.total_estimated_revenue || 0
       weeklyTotals[week].new_estimated_revenue += record.new_estimated_revenue || 0
@@ -99,8 +94,13 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
       })
     }
     
-    // Percentage metrics - 1 decimal
-    if (metric.includes('conversion') || metric.includes('rate')) {
+    // Conversion metrics (stored as decimals, need to multiply by 100)
+    if (metric.includes('conversion')) {
+      return Math.round(value * 100) + '%'
+    }
+    
+    // Other rate metrics - 1 decimal
+    if (metric.includes('rate')) {
       return value.toFixed(1) + '%'
     }
     
@@ -134,14 +134,6 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
         { key: 'new_appointments', label: 'New Appointments' },
         { key: 'returning_appointments', label: 'Returning Appointments' },
         { key: 'online_booking', label: 'Online Bookings' }
-      ]
-    },
-    {
-      title: 'Conversations',
-      metrics: [
-        { key: 'total_conversations', label: 'Total Conversations' },
-        { key: 'new_conversations', label: 'New Conversations' },
-        { key: 'returning_conversations', label: 'Returning Conversations' }
       ]
     },
     {
@@ -214,12 +206,18 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
                         return (
                           <tr key={`${groupIndex}-${metricIndex}`} className="divide-x divide-gray-100">
                             <td className="sticky left-0 z-10 bg-white px-3 py-3 text-xs sm:text-sm text-gray-800 shadow-r">
-                              <div className="flex items-center">
-                                <span className="truncate pr-1">{metric.label}</span>
-                                {metricDescriptions[metric.key] && (
-                                  <Tooltip content={metricDescriptions[metric.key]} />
-                                )}
-                              </div>
+                              {metricDescriptions[metric.key] ? (
+                                <CellTooltip content={metricDescriptions[metric.key]} className="h-full w-full">
+                                  <div className="flex items-center cursor-help">
+                                    <span className="truncate pr-1">{metric.label}</span>
+                                    <Tooltip content={metricDescriptions[metric.key]} />
+                                  </div>
+                                </CellTooltip>
+                              ) : (
+                                <div className="flex items-center">
+                                  <span className="truncate pr-1">{metric.label}</span>
+                                </div>
+                              )}
                             </td>
                             {weeks.map((week, weekIndex) => {
                               const value = getValue(metric.key, week)
@@ -232,7 +230,7 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
                               return (
                                 <td 
                                   key={week} 
-                                  className={`text-right px-3 py-3 text-xs sm:text-sm font-medium ${bgColor} whitespace-nowrap`}
+                                  className={`text-right px-3 py-3 text-xs sm:text-sm font-medium ${bgColor} whitespace-nowrap cursor-pointer`}
                                 >
                                   <span className={textColor}>
                                     {formatValue(metric.key, value)}
