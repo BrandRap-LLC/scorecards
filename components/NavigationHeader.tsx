@@ -7,9 +7,7 @@ import { Menu, X } from 'lucide-react'
 import { DataFreshness } from '@/components/DataFreshness'
 
 const navItems = [
-  { href: '/', label: 'Companies' },
-  { href: '/grid', label: 'Grid' },
-  { href: '/data-quality', label: 'Data' }
+  { href: '/', label: 'Companies' }
 ]
 
 export function NavigationHeader() {
