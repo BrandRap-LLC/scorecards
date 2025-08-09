@@ -203,11 +203,11 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
   
   return (
     <Card className="shadow-lg">
-      <CardHeader className="bg-gray-50 border-b p-4 sm:p-6">
-        <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">
+      <CardHeader className="bg-gray-50 border-b p-3 sm:p-6">
+        <CardTitle className="text-sm sm:text-lg lg:text-xl text-gray-900">
           {channelName}
           {channels.length > 1 && (
-            <span className="block sm:inline text-sm font-normal text-gray-600 mt-1 sm:mt-0 sm:ml-2">
+            <span className="block sm:inline text-xs sm:text-sm font-normal text-gray-600 mt-1 sm:mt-0 sm:ml-2">
               ({channels.join(' + ')})
             </span>
           )}
@@ -219,11 +219,11 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr className="divide-x divide-gray-200">
-                  <th className="sticky left-0 z-10 bg-white text-left px-3 py-3 text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wider min-w-[120px] sm:min-w-[200px] shadow-r">
+                  <th className="sticky left-0 z-10 bg-white text-left px-2 sm:px-3 py-2 sm:py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px] sm:min-w-[200px] shadow-r">
                     Metric
                   </th>
                   {weeks.map(week => (
-                    <th key={week} className="text-right px-3 py-3 text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wider min-w-[80px] sm:min-w-[100px] whitespace-nowrap">
+                    <th key={week} className="text-right px-2 sm:px-3 py-2 sm:py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[70px] sm:min-w-[100px] whitespace-nowrap border-l border-gray-200">
                       <span className="hidden sm:inline">{formatWeek(week)}</span>
                       <span className="sm:hidden text-xs">{formatWeek(week).split(' ')[1]}</span>
                     </th>
@@ -234,7 +234,7 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
                 {metricGroups.map((group, groupIndex) => (
                   <React.Fragment key={groupIndex}>
                     <tr className="bg-gray-50">
-                      <td colSpan={weeks.length + 1} className="px-3 py-2 text-xs sm:text-sm font-semibold text-gray-700">
+                      <td colSpan={weeks.length + 1} className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold text-gray-700 border-l-4 border-gray-400">
                         {group.title}
                       </td>
                     </tr>
@@ -243,7 +243,7 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
                       
                       return (
                         <tr key={`${groupIndex}-${metricIndex}`} className="divide-x divide-gray-100">
-                          <td className="sticky left-0 z-10 bg-white px-3 py-3 text-xs sm:text-sm text-gray-800 shadow-r">
+                          <td className="sticky left-0 z-10 bg-white px-2 sm:px-3 py-2 sm:py-3 text-xs sm:text-sm text-gray-800 shadow-r">
                             {metricDescriptions[metric.key] ? (
                               <CellTooltip content={metricDescriptions[metric.key]} className="h-full w-full">
                                 <div className="flex items-center cursor-help">
@@ -268,7 +268,7 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
                             return (
                               <td 
                                 key={week} 
-                                className={`text-right px-3 py-3 text-xs sm:text-sm font-medium ${bgColor} whitespace-nowrap cursor-pointer`}
+                                className={`relative text-right px-2 sm:px-3 py-2 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group cursor-pointer ${bgColor}`}
                               >
                                 <span className={textColor}>
                                   {formatValue(metric.key, value)}

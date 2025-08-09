@@ -220,13 +220,13 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr className="divide-x divide-gray-200">
-                  <th className="sticky left-0 z-10 bg-white text-left px-3 py-3 text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wider min-w-[120px] sm:min-w-[200px] shadow-r">
+                  <th className="sticky left-0 z-10 bg-white text-left px-2 sm:px-3 py-2 sm:py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px] sm:min-w-[200px] shadow-r">
                     Metric
                   </th>
                   {months.map(month => (
                     <th 
                       key={month} 
-                      className={`text-right px-3 py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider min-w-[80px] sm:min-w-[100px] whitespace-nowrap border-l border-gray-200 ${
+                      className={`text-right px-2 sm:px-3 py-2 sm:py-3 text-xs font-semibold uppercase tracking-wider min-w-[70px] sm:min-w-[100px] whitespace-nowrap border-l border-gray-200 ${
                         month === currentMonth 
                           ? 'bg-blue-50 text-blue-900' 
                           : 'text-gray-700'
@@ -247,7 +247,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
                       </tr>
                     )}
                     <tr className="bg-gradient-to-r from-gray-100 to-gray-50">
-                      <td colSpan={months.length + 1} className="px-3 py-2.5 text-xs sm:text-sm font-semibold text-gray-800 border-l-4 border-gray-400">
+                      <td colSpan={months.length + 1} className="px-2 sm:px-3 py-2 text-xs font-semibold text-gray-800 border-l-4 border-gray-400">
                         {group.title}
                       </td>
                     </tr>
@@ -256,7 +256,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
                       
                       return (
                         <tr key={`${groupIndex}-${metricIndex}`} className="divide-x divide-gray-100">
-                          <td className="sticky left-0 z-10 bg-white px-3 py-3 text-xs sm:text-sm text-gray-800 shadow-r">
+                          <td className="sticky left-0 z-10 bg-white px-2 sm:px-3 py-2 sm:py-3 text-xs text-gray-800 shadow-r">
                             {metricDescriptions[metric.key] ? (
                               <CellTooltip content={metricDescriptions[metric.key]} className="h-full w-full">
                                 <div className="flex items-center cursor-help">
@@ -281,7 +281,7 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
                             return (
                               <td 
                                 key={month} 
-                                className={`relative text-right px-3 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group cursor-pointer ${bgColor} ${
+                                className={`relative text-right px-2 sm:px-3 py-2 sm:py-3 text-xs font-medium whitespace-nowrap border-l border-gray-100 transition-all hover:z-10 group cursor-pointer ${bgColor} ${
                                   month === currentMonth ? 'font-bold' : ''
                                 }`}
                                 title={value !== null ? `${metric.label}: ${value}` : 'No data'}

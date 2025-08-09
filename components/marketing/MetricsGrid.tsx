@@ -146,10 +146,10 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
   return (
     <div className="space-y-4">
       <Card className="shadow-lg">
-        <CardHeader className="bg-gray-50 border-b p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">
+        <CardHeader className="bg-gray-50 border-b p-3 sm:p-6">
+          <CardTitle className="text-sm sm:text-lg lg:text-xl text-gray-900">
             Monthly Performance Metrics 
-            <span className="block sm:inline text-sm sm:text-base font-normal text-gray-600 mt-1 sm:mt-0 sm:ml-2">
+            <span className="block sm:inline text-xs sm:text-base font-normal text-gray-600 mt-1 sm:mt-0 sm:ml-2">
               (All Traffic Sources Combined)
             </span>
           </CardTitle>
@@ -160,13 +160,13 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>
                   <tr className="divide-x divide-gray-200">
-                    <th className="sticky left-0 z-10 bg-white text-left px-3 py-3 text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wider min-w-[120px] sm:min-w-[200px] shadow-r">
+                    <th className="sticky left-0 z-10 bg-white text-left px-2 sm:px-3 py-2 sm:py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px] sm:min-w-[200px] shadow-r">
                       Metric
                     </th>
                     {months.map(month => (
                       <th 
                         key={month} 
-                        className={`text-right px-3 py-3 text-xs sm:text-sm font-semibold uppercase tracking-wider min-w-[80px] sm:min-w-[100px] whitespace-nowrap border-l border-gray-200 ${
+                        className={`text-right px-2 sm:px-3 py-2 sm:py-3 text-xs font-semibold uppercase tracking-wider min-w-[70px] sm:min-w-[100px] whitespace-nowrap border-l border-gray-200 ${
                           month === currentMonth 
                             ? 'bg-blue-50 text-blue-900' 
                             : 'text-gray-700'
