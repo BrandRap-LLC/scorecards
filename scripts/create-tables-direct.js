@@ -1,106 +1,120 @@
-const fetch = require('node-fetch');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '.env.local' });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-async function executeSql(sql) {
-  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': supabaseServiceKey,
-      'Authorization': `Bearer ${supabaseServiceKey}`
-    },
-    body: JSON.stringify({ sql_query: sql })
-  });
-  
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`SQL execution failed: ${error}`);
-  }
-  
-  return response.json();
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase credentials');
+  process.exit(1);
 }
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function createTables() {
-  console.log('📊 Creating tables in Supabase...\n');
-  
+  console.log('Creating missing tables using direct approach...\n');
+
   try {
-    // Create paid_ads table
-    const paidAdsSQL = `
-      CREATE TABLE IF NOT EXISTS paid_ads (
-        clinic text,
-        month timestamp,
-        traffic_source text,
-        campaign text,
-        impressions float,
-        visits float,
-        spend float,
-        total_appointments float,
-        new_appointments float,
-        returning_appointments float,
-        avg_appointment_rev float,
-        appointment_est_revenue float,
-        new_appointment_est_6m_revenue float,
-        total_conversations float,
-        new_conversations float,
-        returning_conversations float,
-        conversation_rate float,
-        appointment_rate float,
-        ctr float
-      );
-    `;
+    // Since we can't execute raw SQL directly through Supabase JS client,
+    // we'll need to use the Supabase Dashboard or SQL Editor.
+    // Let's at least verify which tables already exist
     
-    await executeSql(paidAdsSQL);
-    console.log('✅ paid_ads table created');
+    console.log('Checking existing tables...');
     
-    // Create seo_channels table
-    const seoChannelsSQL = `
-      CREATE TABLE IF NOT EXISTS seo_channels (
-        clinic text,
-        month timestamp,
-        traffic_source text,
-        impressions float,
-        visits float,
-        total_appointments float,
-        new_appointments float,
-        returning_appointments float,
-        avg_appointment_rev float,
-        appointment_est_revenue float,
-        new_appointment_est_6m_revenue float,
-        total_conversations float,
-        new_conversations float,
-        returning_conversations float,
-        conversation_rate float,
-        appointment_rate float,
-        ctr float
-      );
-    `;
+    // Check for executive_summary
+    const { data: execSummary, error: execError } = await supabase
+      .from('executive_summary')
+      .select('*')
+      .limit(1);
     
-    await executeSql(seoChannelsSQL);
-    console.log('✅ seo_channels table created');
+    if (execError?.code === '42P01') {
+      console.log('❌ executive_summary table does not exist');
+    } else if (!execError) {
+      console.log('✅ executive_summary table already exists');
+    }
     
-    // Create indexes
-    const indexSQL = `
-      CREATE INDEX IF NOT EXISTS idx_paid_ads_clinic ON paid_ads(clinic);
-      CREATE INDEX IF NOT EXISTS idx_paid_ads_month ON paid_ads(month);
-      CREATE INDEX IF NOT EXISTS idx_paid_ads_traffic_source ON paid_ads(traffic_source);
-      CREATE INDEX IF NOT EXISTS idx_seo_channels_clinic ON seo_channels(clinic);
-      CREATE INDEX IF NOT EXISTS idx_seo_channels_month ON seo_channels(month);
-      CREATE INDEX IF NOT EXISTS idx_seo_channels_traffic_source ON seo_channels(traffic_source);
-    `;
+    // Check for ceo_weekly_reports
+    const { data: weeklyReports, error: weeklyError } = await supabase
+      .from('ceo_weekly_reports')
+      .select('*')
+      .limit(1);
     
-    await executeSql(indexSQL);
-    console.log('✅ Indexes created');
+    if (weeklyError?.code === '42P01') {
+      console.log('❌ ceo_weekly_reports table does not exist');
+    } else if (!weeklyError) {
+      console.log('✅ ceo_weekly_reports table already exists');
+    }
     
-    console.log('\n✅ All tables created successfully!');
-    console.log('\nNow you can run: node scripts/migrate-paid-ads-seo.js');
+    // Check for ceo_monthly_reports
+    const { data: monthlyReports, error: monthlyError } = await supabase
+      .from('ceo_monthly_reports')
+      .select('*')
+      .limit(1);
     
-  } catch (err) {
-    console.error('Error creating tables:', err.message);
-    console.log('\nPlease create the tables manually in Supabase SQL Editor.');
+    if (monthlyError?.code === '42P01') {
+      console.log('❌ ceo_monthly_reports table does not exist');
+    } else if (!monthlyError) {
+      console.log('✅ ceo_monthly_reports table already exists');
+    }
+    
+    console.log('\nTo create the missing tables, please run the following SQL commands in the Supabase SQL Editor:');
+    console.log('\n--- SQL Commands to Execute ---\n');
+    
+    console.log(`-- 1. Create executive_summary table
+CREATE TABLE IF NOT EXISTS executive_summary (
+  clinic text,
+  month text,
+  traffic_source text,
+  appointments numeric,
+  appointments_new numeric,
+  appointments_returning numeric,
+  estimated_ltv_6m numeric,
+  estimated_revenue numeric,
+  conversations numeric,
+  conversations_new numeric,
+  conversations_returning numeric,
+  created_at timestamp with time zone DEFAULT now()
+);
+
+-- 2. Create ceo_weekly_reports table
+CREATE TABLE IF NOT EXISTS ceo_weekly_reports (
+  week numeric,
+  company text,
+  clinic text,
+  impressions numeric,
+  visits numeric,
+  leads numeric,
+  appointments numeric,
+  spend numeric,
+  ltv numeric,
+  roas numeric,
+  conversion_rate numeric,
+  cost_per_lead numeric,
+  cost_per_appointment numeric,
+  created_at timestamp with time zone DEFAULT now()
+);
+
+-- 3. Create ceo_monthly_reports table
+CREATE TABLE IF NOT EXISTS ceo_monthly_reports (
+  month text,
+  company text,
+  clinic text,
+  impressions numeric,
+  visits numeric,
+  leads numeric,
+  appointments numeric,
+  spend numeric,
+  ltv numeric,
+  roas numeric,
+  conversion_rate numeric,
+  cost_per_lead numeric,
+  cost_per_appointment numeric,
+  created_at timestamp with time zone DEFAULT now()
+);`);
+    
+  } catch (error) {
+    console.error('Error:', error);
   }
 }
 
-createTables();
+createTables().catch(console.error);
