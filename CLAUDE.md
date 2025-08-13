@@ -23,7 +23,7 @@ npm lint
 
 ## Architecture Overview
 
-This is a Next.js 15.4.5 application using TypeScript and Tailwind CSS v4 for an executive analytics dashboard tracking clinic operations across multiple companies. The application exclusively uses the `executive_monthly_reports` table in Supabase for all data visualization and analysis.
+This is a Next.js 15.4.5 application using TypeScript and Tailwind CSS v4 for an executive analytics dashboard tracking clinic operations across multiple companies.
 
 ### Tech Stack
 - **Framework**: Next.js 15.4.5 with App Router
@@ -36,29 +36,42 @@ This is a Next.js 15.4.5 application using TypeScript and Tailwind CSS v4 for an
 
 ### Data Flow Architecture
 
-1. **Primary Data Source**: 
-   - **Table**: `executive_monthly_reports` (Supabase)
-   - **Origin**: Migrated from MSSQL `executive_report_new_month`
-   - **Records**: 572 entries for December 2024
-   - **Structure**: 21 metrics across 11 clinics and 8 traffic sources
+1. **Primary Data Sources** (Active Tables Used in Project):
+   
+   **Executive Reports**:
+   - `executive_monthly_reports` - Monthly executive metrics (580 rows)
+   - `executive_weekly_reports` - Weekly executive metrics (2,169 rows)
+   
+   **Marketing Analytics**:
+   - `paid_ads` - Paid advertising data by campaign (907 rows)
+   - `seo_channels` - SEO channel performance data (232 rows)
+   - `seo_highlights_keyword_page_one` - Top ranking keywords (159 rows)
+   
+   **CEO Metrics** (Legacy tables - may need schema updates):
+   - `ceo_metrics` - Monthly KPI tracking (6,380 rows)
+   - `ceo_metrics_weekly` - Weekly KPI tracking (26,796 rows)
 
-2. **Data Model**:
+2. **Data Model** (Executive Reports):
    ```
-   executive_monthly_reports
+   executive_monthly_reports / executive_weekly_reports
    ├── Dimensions
    │   ├── clinic (11 unique)
-   │   ├── month (December 2024)
+   │   ├── month/week (time period)
    │   └── traffic_source (8 channels)
    └── Metrics
        ├── Marketing: impressions, visits, spend
-       ├── Leads: leads, conversion_rate
+       ├── Leads: leads, conversion_rate, %new_conversion, %returning_conversion
        ├── Acquisition: cac_total, cac_new
        ├── Appointments: total, new, returning, online
        ├── Engagement: conversations (total, new, returning)
        └── Revenue: ltv, estimated_ltv_6m, avg_ltv, roas
    ```
 
-3. **Note**: Other tables (`companies`, `scorecards_*`) exist but are NOT used in this project
+3. **MSSQL Source Tables** (for sync operations):
+   - `executive_report_new_month` → `executive_monthly_reports`
+   - `executive_report_new_week` → `executive_weekly_reports`
+   - `marketing_score_card_daily` → `paid_ads` (potential source)
+   - SEO data sources (TBD)
 
 ### Application Structure (Planned)
 
@@ -69,6 +82,8 @@ This is a Next.js 15.4.5 application using TypeScript and Tailwind CSS v4 for an
 
 **API Layer** (`/lib`):
 - `api-executive.ts`: Functions for executive_monthly_reports queries
+- `api-weekly.ts`: Functions for weekly reports and CEO metrics
+- `api-paid-seo.ts`: Functions for paid ads and SEO channel queries
 - `supabase.ts`: Supabase client configuration
 - `utils.ts`: Formatting utilities (currency, percent, numbers)
 - `calculations.ts`: Derived metrics and KPI calculations
@@ -78,13 +93,15 @@ This is a Next.js 15.4.5 application using TypeScript and Tailwind CSS v4 for an
 - `dashboard.ts`: Dashboard component prop types
 - `charts.ts`: Chart data structure types
 
-### Key Metrics from executive_monthly_reports
+### Key Metrics Tracked
 - **Marketing Performance**: Impressions, Visits, Spend by traffic source
-- **Lead Generation**: Total leads, Conversion rates
+- **Lead Generation**: Total leads, Conversion rates (including %new and %returning)
 - **Customer Acquisition**: CAC (total and new), Cost per lead
 - **Appointments**: Total, New, Returning, Online bookings
 - **Engagement**: Conversations (total, new, returning)
 - **Revenue/ROI**: LTV, ROAS, Estimated 6-month LTV
+- **Paid Ads**: Campaign-level performance, CTR, spend efficiency
+- **SEO**: Keyword rankings, page one visibility, organic traffic
 
 ### Data Format Types
 - `currency`: USD formatting without decimals
@@ -176,15 +193,24 @@ TypeScript configured with `@/*` alias pointing to root directory for clean impo
 - Created new table `executive_monthly_reports` without affecting existing data
 - 572 records migrated containing monthly executive metrics
 
-### 📊 Executive Monthly Reports Table
-**Table**: `executive_monthly_reports`
-**Records**: 572
-**Fields**: clinic, month, traffic_source, impressions, visits, spend, ltv, roas, leads, conversion_rate, appointments, conversations
-**Date Range**: December 2024
-**Migration Script**: `scripts/migrate-direct-insert.js`
+### 📊 Active Supabase Tables
+**Executive Reports**:
+- `executive_monthly_reports`: 580 records (Dec 2024 - Aug 2025)
+- `executive_weekly_reports`: 2,169 records (weekly data)
 
-### 🛠️ Available Migration Scripts
-- `scripts/migrate-direct-insert.js` - Main migration script for monthly data
-- `scripts/test-mssql-simple.js` - Test MSSQL connection
-- `scripts/check-tables.js` - Check Supabase table status
-- `scripts/sync-mssql-to-supabase.js` - Weekly data sync script
+**Marketing Analytics**:
+- `paid_ads`: 907 records (campaign-level paid advertising data)
+- `seo_channels`: 232 records (SEO channel performance)
+- `seo_highlights_keyword_page_one`: 159 records (top ranking keywords)
+
+**CEO Metrics**:
+- `ceo_metrics`: 6,380 records (monthly KPIs)
+- `ceo_metrics_weekly`: 26,796 records (weekly KPIs)
+
+### 🛠️ Data Sync Script
+- `scripts/sync-mssql-to-supabase.js` - Main sync script for all 5 tables
+  - Syncs all tables: `node scripts/sync-mssql-to-supabase.js`
+  - Sync specific table: `node scripts/sync-mssql-to-supabase.js --table=executiveMonthly`
+  - Dry run mode: `node scripts/sync-mssql-to-supabase.js --dry-run`
+- See `DATA_SYNC_GUIDE.md` for complete sync instructions
+```

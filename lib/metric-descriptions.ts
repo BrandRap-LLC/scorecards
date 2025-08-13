@@ -8,9 +8,10 @@ export const metricDescriptions: Record<string, string> = {
   'returning_leads': 'Existing patients making new contact (calls, forms, or online bookings)',
   
   // Conversion Metrics
-  'total_conversion': 'Overall percentage of leads that booked appointments',
-  'new_conversion': 'Percentage of new leads that booked appointments',
-  'returning_conversion': 'Percentage of returning leads that booked appointments',
+  'total_conversion': 'Overall percentage of visits that became leads',
+  'new_conversion': 'Percentage of visits from new users that became leads',
+  'returning_conversion': 'Percentage of visits from returning users that became leads',
+  'conversion_rate': 'Overall percentage of visits that became leads',
   'total_appointments': 'All appointments booked (new + returning patients)',
   'new_appointments': 'Appointments booked by first-time patients',
   'returning_appointments': 'Appointments booked by existing patients',

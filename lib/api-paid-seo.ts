@@ -4,22 +4,29 @@ export interface PaidAdsRecord {
   clinic: string;
   month: string;
   traffic_source: string;
-  campaign: string | null;
+  campaign: string;
   impressions: number | null;
   visits: number | null;
   spend: number | null;
+  estimated_ltv_6m: number | null;
+  total_roas: number | null;
+  new_roas: number | null;
+  leads: number | null;
+  new_leads: number | null;
+  returning_leads: number | null;
+  total_conversion: number | null;
+  new_conversion: number | null;
+  returning_conversion: number | null;
+  cac_total: number | null;
+  cac_new: number | null;
+  total_estimated_revenue: number | null;
+  new_estimated_revenue: number | null;
   total_appointments: number | null;
   new_appointments: number | null;
   returning_appointments: number | null;
-  avg_appointment_rev: number | null;
-  appointment_est_revenue: number | null;
-  new_appointment_est_6m_revenue: number | null;
   total_conversations: number | null;
   new_conversations: number | null;
   returning_conversations: number | null;
-  conversation_rate: number | null;
-  appointment_rate: number | null;
-  ctr: number | null;
 }
 
 export interface SeoChannelsRecord {
@@ -28,18 +35,21 @@ export interface SeoChannelsRecord {
   traffic_source: string;
   impressions: number | null;
   visits: number | null;
+  estimated_ltv_6m: number | null;
+  leads: number | null;
+  new_leads: number | null;
+  returning_leads: number | null;
+  total_conversion: number | null;
+  new_conversion: number | null;
+  returning_conversion: number | null;
+  total_estimated_revenue: number | null;
+  new_estimated_revenue: number | null;
   total_appointments: number | null;
   new_appointments: number | null;
   returning_appointments: number | null;
-  avg_appointment_rev: number | null;
-  appointment_est_revenue: number | null;
-  new_appointment_est_6m_revenue: number | null;
   total_conversations: number | null;
   new_conversations: number | null;
   returning_conversations: number | null;
-  conversation_rate: number | null;
-  appointment_rate: number | null;
-  ctr: number | null;
 }
 
 export async function fetchPaidAdsData(

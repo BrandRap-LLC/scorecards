@@ -93,15 +93,16 @@ export default function SEOChannelGrid({ clinic }: SEOChannelGridProps) {
       if (value === null || value === undefined) return '-'
       
       // Currency metrics - no decimals
-      if (metric.includes('revenue') || metric.includes('rev')) {
+      if (metric.includes('revenue') || metric.includes('rev') || 
+          metric.includes('ltv')) {
         return '$' + value.toLocaleString('en-US', { 
           minimumFractionDigits: 0,
           maximumFractionDigits: 0 
         })
       }
       
-      // CTR and rate metrics (stored as decimals in seo_channels)
-      if (metric === 'ctr' || metric.includes('rate')) {
+      // Percentage metrics (stored as decimals, e.g., 0.85 = 85%)
+      if (metric.includes('conversion') || metric.includes('rate')) {
         return (value * 100).toFixed(1) + '%'
       }
       
@@ -116,14 +117,29 @@ export default function SEOChannelGrid({ clinic }: SEOChannelGridProps) {
       return Math.round(value).toLocaleString()
     }
     
-    // Define metric groups - using all fields from seo_channels table
+    // Define metric groups - using all fields from updated seo_channels table
     const metricGroups = [
       {
-        title: 'Traffic & Engagement',
+        title: 'Traffic',
         metrics: [
           { key: 'impressions', label: 'Impressions' },
-          { key: 'visits', label: 'Visits' },
-          { key: 'ctr', label: 'Click-Through Rate' }
+          { key: 'visits', label: 'Visits' }
+        ]
+      },
+      {
+        title: 'Lead Generation',
+        metrics: [
+          { key: 'leads', label: 'Total Leads' },
+          { key: 'new_leads', label: 'New Leads' },
+          { key: 'returning_leads', label: 'Returning Leads' }
+        ]
+      },
+      {
+        title: 'Conversion Rates',
+        metrics: [
+          { key: 'total_conversion', label: 'Total Conversion %' },
+          { key: 'new_conversion', label: 'New Conversion %' },
+          { key: 'returning_conversion', label: 'Returning Conversion %' }
         ]
       },
       {
@@ -131,15 +147,23 @@ export default function SEOChannelGrid({ clinic }: SEOChannelGridProps) {
         metrics: [
           { key: 'total_appointments', label: 'Total Appointments' },
           { key: 'new_appointments', label: 'New Appointments' },
-          { key: 'returning_appointments', label: 'Returning Appointments' },
-          { key: 'appointment_rate', label: 'Appointment Rate' }
+          { key: 'returning_appointments', label: 'Returning Appointments' }
+        ]
+      },
+      {
+        title: 'Conversations',
+        metrics: [
+          { key: 'total_conversations', label: 'Total Conversations' },
+          { key: 'new_conversations', label: 'New Conversations' },
+          { key: 'returning_conversations', label: 'Returning Conversations' }
         ]
       },
       {
         title: 'Revenue',
         metrics: [
-          { key: 'appointment_est_revenue', label: 'Appointment Est. Revenue' },
-          { key: 'new_appointment_est_6m_revenue', label: 'New Appointment 6M Revenue' }
+          { key: 'total_estimated_revenue', label: 'Total Est. Revenue' },
+          { key: 'new_estimated_revenue', label: 'New Est. Revenue' },
+          { key: 'estimated_ltv_6m', label: 'Est. LTV 6M' }
         ]
       }
     ]
