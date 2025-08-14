@@ -26,20 +26,31 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
   weeks.forEach(week => {
     const weekRecords = data.filter(row => row.week === week)
     
-    // Initialize totals for this week
+    // Initialize totals for this week with all available fields
     weeklyTotals[week] = {
       impressions: 0,
       visits: 0,
+      spend: 0,
       leads: 0,
       new_leads: 0,
       returning_leads: 0,
+      total_conversion: 0,
+      new_conversion: 0,
+      returning_conversion: 0,
+      cac_total: 0,
+      cac_new: 0,
       total_appointments: 0,
       new_appointments: 0,
       returning_appointments: 0,
+      appointments: 0,
       online_booking: 0,
-      spend: 0,
+      conversations: 0,
       total_estimated_revenue: 0,
       new_estimated_revenue: 0,
+      estimated_ltv_6m: 0,
+      total_roas: 0,
+      new_roas: 0,
+      roas: 0,
       _count: weekRecords.length
     }
     
@@ -48,16 +59,27 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
       // Direct sum for all metrics
       weeklyTotals[week].impressions += record.impressions || 0
       weeklyTotals[week].visits += record.visits || 0
+      weeklyTotals[week].spend += record.spend || 0
       weeklyTotals[week].leads += record.leads || 0
       weeklyTotals[week].new_leads += record.new_leads || 0
       weeklyTotals[week].returning_leads += record.returning_leads || 0
+      weeklyTotals[week].total_conversion += record.total_conversion || 0
+      weeklyTotals[week].new_conversion += record.new_conversion || 0
+      weeklyTotals[week].returning_conversion += record.returning_conversion || 0
+      weeklyTotals[week].cac_total += record.cac_total || 0
+      weeklyTotals[week].cac_new += record.cac_new || 0
       weeklyTotals[week].total_appointments += record.total_appointments || 0
       weeklyTotals[week].new_appointments += record.new_appointments || 0
       weeklyTotals[week].returning_appointments += record.returning_appointments || 0
+      weeklyTotals[week].appointments += record.appointments || 0
       weeklyTotals[week].online_booking += record.online_booking || 0
-      weeklyTotals[week].spend += record.spend || 0
+      weeklyTotals[week].conversations += record.conversations || 0
       weeklyTotals[week].total_estimated_revenue += record.total_estimated_revenue || 0
       weeklyTotals[week].new_estimated_revenue += record.new_estimated_revenue || 0
+      weeklyTotals[week].estimated_ltv_6m += record.estimated_ltv_6m || 0
+      weeklyTotals[week].total_roas += record.total_roas || 0
+      weeklyTotals[week].new_roas += record.new_roas || 0
+      weeklyTotals[week].roas += record.roas || 0
     })
   })
   
@@ -85,7 +107,9 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
     if (value === null || value === undefined) return '-'
     
     // Currency metrics - no decimals
-    if (metric.includes('revenue') || metric.includes('spend') || metric.includes('rev')) {
+    if (metric.includes('revenue') || metric.includes('spend') || 
+        metric.includes('rev') || metric.includes('cac') || 
+        metric.includes('ltv')) {
       return '$' + value.toLocaleString('en-US', { 
         minimumFractionDigits: 0,
         maximumFractionDigits: 0 
@@ -94,7 +118,12 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
     
     // Conversion metrics (stored as decimals, need to multiply by 100)
     if (metric.includes('conversion')) {
-      return Math.round(value * 100) + '%'
+      return (value * 100).toFixed(1) + '%'
+    }
+    
+    // ROAS metrics (show as multiplier with 1 decimal)
+    if (metric.includes('roas')) {
+      return value.toFixed(1) + 'x'
     }
     
     // Other rate metrics - 1 decimal
@@ -113,16 +142,37 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
     return Math.round(value).toLocaleString()
   }
   
-  // Define metric groups in display order - REMOVED metrics as requested
+  // Define metric groups in display order - ALL metrics from weekly reports
   const metricGroups = [
     {
-      title: 'Traffic & Engagement',
+      title: 'Traffic & Spend',
       metrics: [
         { key: 'impressions', label: 'Impressions' },
         { key: 'visits', label: 'Visits' },
+        { key: 'spend', label: 'Ad Spend' }
+      ]
+    },
+    {
+      title: 'Lead Generation',
+      metrics: [
         { key: 'leads', label: 'Total Leads' },
         { key: 'new_leads', label: 'New Leads' },
         { key: 'returning_leads', label: 'Returning Leads' }
+      ]
+    },
+    {
+      title: 'Conversion Rates',
+      metrics: [
+        { key: 'total_conversion', label: 'Total Conversion %' },
+        { key: 'new_conversion', label: 'New Conversion %' },
+        { key: 'returning_conversion', label: 'Returning Conversion %' }
+      ]
+    },
+    {
+      title: 'Customer Acquisition',
+      metrics: [
+        { key: 'cac_total', label: 'CAC Total' },
+        { key: 'cac_new', label: 'CAC New' }
       ]
     },
     {
@@ -135,11 +185,19 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
       ]
     },
     {
-      title: 'Financial Performance',
+      title: 'Conversations',
       metrics: [
-        { key: 'spend', label: 'Ad Spend' },
+        { key: 'conversations', label: 'Total Conversations' }
+      ]
+    },
+    {
+      title: 'Revenue & ROI',
+      metrics: [
         { key: 'total_estimated_revenue', label: 'Total Est. Revenue' },
-        { key: 'new_estimated_revenue', label: 'New Est. Revenue' }
+        { key: 'new_estimated_revenue', label: 'New Est. Revenue' },
+        { key: 'estimated_ltv_6m', label: 'Est. LTV 6M' },
+        { key: 'total_roas', label: 'Total ROAS' },
+        { key: 'new_roas', label: 'New ROAS' }
       ]
     }
   ]

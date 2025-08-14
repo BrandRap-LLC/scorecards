@@ -28,54 +28,60 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
   weeks.forEach(week => {
     const weekRecords = channelData.filter(row => row.week === week)
     
-    // Initialize totals for this week
+    // Initialize totals for this week with all available fields
     weeklyTotals[week] = {
       impressions: 0,
       visits: 0,
+      spend: 0,
       leads: 0,
       new_leads: 0,
       returning_leads: 0,
       total_conversion: 0,
       new_conversion: 0,
       returning_conversion: 0,
+      cac_total: 0,
+      cac_new: 0,
       total_appointments: 0,
       new_appointments: 0,
       returning_appointments: 0,
+      appointments: 0,
       online_booking: 0,
-      spend: 0,
+      conversations: 0,
       total_estimated_revenue: 0,
       new_estimated_revenue: 0,
+      estimated_ltv_6m: 0,
       total_roas: 0,
       new_roas: 0,
-      cac_total: 0,
-      cac_new: 0,
-      estimated_ltv_6m: 0,
+      roas: 0,
       _count: weekRecords.length
     }
     
     // Sum up all channels for this week - NO CALCULATIONS, NO WEIGHTED AVERAGES
     weekRecords.forEach(record => {
-      // Direct sum for all metrics - just show individual channel values
+      // Direct sum for all metrics - include all available fields
       weeklyTotals[week].impressions += record.impressions || 0
       weeklyTotals[week].visits += record.visits || 0
+      weeklyTotals[week].spend += record.spend || 0
       weeklyTotals[week].leads += record.leads || 0
       weeklyTotals[week].new_leads += record.new_leads || 0
       weeklyTotals[week].returning_leads += record.returning_leads || 0
+      weeklyTotals[week].total_conversion += record.total_conversion || 0
+      weeklyTotals[week].new_conversion += record.new_conversion || 0
+      weeklyTotals[week].returning_conversion += record.returning_conversion || 0
+      weeklyTotals[week].cac_total += record.cac_total || 0
+      weeklyTotals[week].cac_new += record.cac_new || 0
       weeklyTotals[week].total_appointments += record.total_appointments || 0
       weeklyTotals[week].new_appointments += record.new_appointments || 0
       weeklyTotals[week].returning_appointments += record.returning_appointments || 0
+      weeklyTotals[week].appointments += record.appointments || 0
       weeklyTotals[week].online_booking += record.online_booking || 0
-      weeklyTotals[week].spend += record.spend || 0
+      weeklyTotals[week].conversations += record.conversations || 0
       weeklyTotals[week].total_estimated_revenue += record.total_estimated_revenue || 0
       weeklyTotals[week].new_estimated_revenue += record.new_estimated_revenue || 0
       weeklyTotals[week].estimated_ltv_6m += record.estimated_ltv_6m || 0
       weeklyTotals[week].total_roas += record.total_roas || 0
       weeklyTotals[week].new_roas += record.new_roas || 0
-      weeklyTotals[week].cac_total += record.cac_total || 0
-      weeklyTotals[week].cac_new += record.cac_new || 0
-      weeklyTotals[week].total_conversion += record.total_conversion || 0
-      weeklyTotals[week].new_conversion += record.new_conversion || 0
-      weeklyTotals[week].returning_conversion += record.returning_conversion || 0
+      weeklyTotals[week].roas += record.roas || 0
     })
   })
   
@@ -108,9 +114,9 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
       return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 })
     }
     
-    // ROAS metrics (show as decimal with 2 places)
+    // ROAS metrics (show as multiplier with 1 decimal)
     if (metric.includes('roas')) {
-      return value.toFixed(2)
+      return value.toFixed(1) + 'x'
     }
     
     // Conversion metrics (stored as decimals, need to multiply by 100)
