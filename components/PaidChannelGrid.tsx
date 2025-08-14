@@ -114,39 +114,12 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
       return `${monthNames[date.getMonth()]} ${date.getFullYear()}`
     }
     
-    // Format value based on metric type - matching ChannelGrid formatting
+    // Display value exactly as stored in database - NO FORMATTING
     const formatValue = (metric: string, value: number | null) => {
       if (value === null || value === undefined) return '-'
       
-      // Currency metrics - no decimals
-      if (metric.includes('revenue') || metric.includes('spend') || 
-          metric.includes('rev') || metric.includes('cac') || 
-          metric.includes('ltv')) {
-        return '$' + value.toLocaleString('en-US', { 
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0 
-        })
-      }
-      
-      // Percentage metrics (stored as decimals, e.g., 0.85 = 85%)
-      if (metric.includes('conversion') || metric.includes('rate')) {
-        return (value * 100).toFixed(1) + '%'
-      }
-      
-      // ROAS metrics (show as multiplier with 1 decimal)
-      if (metric.includes('roas')) {
-        return value.toFixed(1) + 'x'
-      }
-      
-      // Large numbers - use K/M notation
-      if (value >= 1000000) {
-        return (value / 1000000).toFixed(1) + 'M'
-      } else if (value >= 10000) {
-        return (value / 1000).toFixed(0) + 'K'
-      }
-      
-      // Default: show as integer with commas
-      return Math.round(value).toLocaleString()
+      // Show exact value from database
+      return value.toString()
     }
     
     // Define metric groups - using all fields from updated paid_ads table

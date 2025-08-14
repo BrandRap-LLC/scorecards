@@ -89,43 +89,12 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
     return `${monthNames[parseInt(monthNum) - 1]} ${year}`
   }
   
-  // Format value based on metric type with consistent decimal places
+  // Display value exactly as stored in database - NO FORMATTING
   const formatValue = (metric: string, value: number | null) => {
     if (value === null || value === undefined) return '-'
     
-    // Currency metrics - no decimals
-    if (metric.includes('revenue') || metric.includes('spend') || metric.includes('cac') || 
-        metric.includes('ltv') || metric.includes('rev')) {
-      return '$' + value.toLocaleString('en-US', { 
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0 
-      })
-    }
-    
-    // ROAS metrics (show as decimal with 2 places)
-    if (metric.includes('roas')) {
-      return value.toFixed(2)
-    }
-    
-    // Conversion metrics (stored as decimals, need to multiply by 100)
-    if (metric.includes('conversion')) {
-      return Math.round(value * 100) + '%'
-    }
-    
-    // Other rate metrics (already in percentage form from DB)
-    if (metric.includes('rate')) {
-      return value.toFixed(1) + '%'
-    }
-    
-    // Large numbers - use K/M notation
-    if (value >= 1000000) {
-      return (value / 1000000).toFixed(1) + 'M'
-    } else if (value >= 10000) {
-      return (value / 1000).toFixed(0) + 'K'
-    }
-    
-    // Default: show as integer with commas
-    return Math.round(value).toLocaleString()
+    // Show exact value from database
+    return value.toString()
   }
   
   // Check if this is SEO data (includes local seo or organic seo)

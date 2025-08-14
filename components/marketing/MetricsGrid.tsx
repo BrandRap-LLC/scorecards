@@ -68,37 +68,12 @@ export default function MetricsGrid({ data }: MetricsGridProps) {
     return `${monthNames[parseInt(monthNum) - 1]} ${year}`
   }
   
-  // Format value based on metric type with consistent decimal places
+  // Display value exactly as stored in database - NO FORMATTING
   const formatValue = (metric: string, value: number | null) => {
     if (value === null || value === undefined) return '-'
     
-    // Currency metrics - no decimals
-    if (metric.includes('revenue') || metric.includes('spend') || metric.includes('rev')) {
-      return '$' + value.toLocaleString('en-US', { 
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0 
-      })
-    }
-    
-    // Conversion metrics (stored as decimals, need to multiply by 100)
-    if (metric.includes('conversion')) {
-      return Math.round(value * 100) + '%'
-    }
-    
-    // Other rate metrics - 1 decimal
-    if (metric.includes('rate')) {
-      return value.toFixed(1) + '%'
-    }
-    
-    // Large numbers - use K/M notation
-    if (value >= 1000000) {
-      return (value / 1000000).toFixed(1) + 'M'
-    } else if (value >= 10000) {
-      return (value / 1000).toFixed(0) + 'K'
-    }
-    
-    // Default: show as integer with commas
-    return Math.round(value).toLocaleString()
+    // Show exact value from database
+    return value.toString()
   }
   
   // Define metric groups in display order - REMOVED metrics as requested

@@ -104,33 +104,12 @@ export default function WeeklyChannelGrid({ data, channelName, channels }: Weekl
     }
   }
   
-  // Format value based on metric type
+  // Display value exactly as stored in database - NO FORMATTING
   const formatValue = (metric: string, value: number | null) => {
     if (value === null || value === undefined) return '-'
     
-    // Currency metrics
-    if (metric.includes('revenue') || metric.includes('spend') || metric.includes('cac') || 
-        metric.includes('ltv') || metric.includes('rev')) {
-      return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 })
-    }
-    
-    // ROAS metrics (show as multiplier with 1 decimal)
-    if (metric.includes('roas')) {
-      return value.toFixed(1) + 'x'
-    }
-    
-    // Conversion metrics (stored as decimals, need to multiply by 100)
-    if (metric.includes('conversion')) {
-      return Math.round(value * 100) + '%'
-    }
-    
-    // Other rate metrics (already in percentage form from DB)
-    if (metric.includes('rate')) {
-      return value.toFixed(1) + '%'
-    }
-    
-    // Default: show as integer
-    return Math.round(value).toLocaleString()
+    // Show exact value from database
+    return value.toString()
   }
   
   // Check if this is SEO data (includes local seo or organic seo)
