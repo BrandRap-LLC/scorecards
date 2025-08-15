@@ -6,7 +6,6 @@ import { createClient } from '@supabase/supabase-js'
 import MetricsGrid from '@/components/marketing/MetricsGrid'
 import ChannelGrid from '@/components/marketing/ChannelGrid'
 import WeeklyMetricsGrid from '@/components/marketing/WeeklyMetricsGrid'
-import WeeklyChannelGrid from '@/components/marketing/WeeklyChannelGrid'
 import PaidChannelGrid from '@/components/PaidChannelGrid'
 import SEOChannelGrid from '@/components/SEOChannelGrid'
 import SEOHighlights from '@/components/marketing/SEOHighlights'
@@ -237,26 +236,7 @@ export default function MarketingDashboard() {
           </div>
         ) : activeTab === 'weekly' ? (
           <div className="space-y-4 sm:space-y-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-              <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">Weekly View</h3>
-              <p className="text-xs sm:text-sm text-blue-800">Showing last 12 weeks of performance data</p>
-            </div>
             <WeeklyMetricsGrid data={weeklyData} />
-            <WeeklyChannelGrid 
-              data={weeklyData} 
-              channelName="Google Ads" 
-              channels={['google ads']} 
-            />
-            <WeeklyChannelGrid 
-              data={weeklyData} 
-              channelName="Social Ads" 
-              channels={['social ads']} 
-            />
-            <WeeklyChannelGrid 
-              data={weeklyData} 
-              channelName="SEO" 
-              channels={['local seo', 'organic seo']} 
-            />
           </div>
         ) : activeTab === 'paid' ? (
           <div className="space-y-4 sm:space-y-6">

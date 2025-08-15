@@ -108,37 +108,16 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
     return formatMetricValue(metric, value)
   }
   
-  // Define metric groups in display order - ALL metrics from weekly reports
+  // Define metric groups in display order - matching Monthly view
   const metricGroups = [
     {
-      title: 'Traffic & Spend',
+      title: 'Traffic & Engagement',
       metrics: [
         { key: 'impressions', label: 'Impressions' },
         { key: 'visits', label: 'Visits' },
-        { key: 'spend', label: 'Ad Spend' }
-      ]
-    },
-    {
-      title: 'Lead Generation',
-      metrics: [
         { key: 'leads', label: 'Total Leads' },
         { key: 'new_leads', label: 'New Leads' },
         { key: 'returning_leads', label: 'Returning Leads' }
-      ]
-    },
-    {
-      title: 'Conversion Rates',
-      metrics: [
-        { key: 'total_conversion', label: 'Total Conversion %' },
-        { key: 'new_conversion', label: 'New Conversion %' },
-        { key: 'returning_conversion', label: 'Returning Conversion %' }
-      ]
-    },
-    {
-      title: 'Customer Acquisition',
-      metrics: [
-        { key: 'cac_total', label: 'CAC Total' },
-        { key: 'cac_new', label: 'CAC New' }
       ]
     },
     {
@@ -151,19 +130,11 @@ export default function WeeklyMetricsGrid({ data }: WeeklyMetricsGridProps) {
       ]
     },
     {
-      title: 'Conversations',
+      title: 'Financial Performance',
       metrics: [
-        { key: 'conversations', label: 'Total Conversations' }
-      ]
-    },
-    {
-      title: 'Revenue & ROI',
-      metrics: [
+        { key: 'spend', label: 'Ad Spend' },
         { key: 'total_estimated_revenue', label: 'Total Est. Revenue' },
-        { key: 'new_estimated_revenue', label: 'New Est. Revenue' },
-        { key: 'estimated_ltv_6m', label: 'Est. LTV 6M' },
-        { key: 'total_roas', label: 'Total ROAS' },
-        { key: 'new_roas', label: 'New ROAS' }
+        { key: 'new_estimated_revenue', label: 'New Est. Revenue' }
       ]
     }
   ]
