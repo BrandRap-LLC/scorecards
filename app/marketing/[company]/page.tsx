@@ -138,7 +138,7 @@ export default function MarketingDashboard() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Overview
+              Monthly
             </button>
             <button
               onClick={() => {
