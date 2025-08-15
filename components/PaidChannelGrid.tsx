@@ -108,11 +108,11 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
       monthlyData[month] = monthRecord || null
     })
     
-    // Format month for display
+    // Format month for display - fix timezone issue by parsing as UTC
     const formatMonth = (month: string) => {
-      const date = new Date(month)
+      const [year, monthNum] = month.split('-')
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      return `${monthNames[date.getMonth()]} ${date.getFullYear()}`
+      return `${monthNames[parseInt(monthNum) - 1]} ${year}`
     }
     
     // Format value using centralized formatting utility
