@@ -7,6 +7,7 @@ import { getHeatmapColor } from '@/lib/heatmap'
 import { Tooltip } from '@/components/ui/tooltip'
 import { metricDescriptions } from '@/lib/metric-descriptions'
 import { PaidAdsRecord } from '@/lib/api-paid-seo'
+import { formatMetricValue } from '@/lib/format-metrics'
 
 interface PaidChannelGridProps {
   clinic: string
@@ -114,12 +115,9 @@ export default function PaidChannelGrid({ clinic }: PaidChannelGridProps) {
       return `${monthNames[date.getMonth()]} ${date.getFullYear()}`
     }
     
-    // Display value exactly as stored in database - NO FORMATTING
+    // Format value using centralized formatting utility
     const formatValue = (metric: string, value: number | null) => {
-      if (value === null || value === undefined) return '-'
-      
-      // Show exact value from database
-      return value.toString()
+      return formatMetricValue(metric, value)
     }
     
     // Define metric groups - using all fields from updated paid_ads table

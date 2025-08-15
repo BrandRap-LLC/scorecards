@@ -7,6 +7,7 @@ import { getHeatmapColor } from '@/lib/heatmap'
 import { Tooltip } from '@/components/ui/tooltip'
 import { metricDescriptions } from '@/lib/metric-descriptions'
 import { SeoChannelsRecord } from '@/lib/api-paid-seo'
+import { formatMetricValue } from '@/lib/format-metrics'
 
 interface SEOChannelGridProps {
   clinic: string
@@ -88,12 +89,9 @@ export default function SEOChannelGrid({ clinic }: SEOChannelGridProps) {
       return `${monthNames[date.getMonth()]} ${date.getFullYear()}`
     }
     
-    // Display value exactly as stored in database - NO FORMATTING
+    // Format value using centralized formatting utility
     const formatValue = (metric: string, value: number | null) => {
-      if (value === null || value === undefined) return '-'
-      
-      // Show exact value from database
-      return value.toString()
+      return formatMetricValue(metric, value)
     }
     
     // Define metric groups - using all fields from updated seo_channels table

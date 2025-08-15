@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getHeatmapColor } from '@/lib/heatmap'
 import { Tooltip } from '@/components/ui/tooltip'
 import { metricDescriptions } from '@/lib/metric-descriptions'
+import { formatMetricValue } from '@/lib/format-metrics'
 
 interface ChannelGridProps {
   data: any[]
@@ -89,12 +90,9 @@ export default function ChannelGrid({ data, channelName, channels }: ChannelGrid
     return `${monthNames[parseInt(monthNum) - 1]} ${year}`
   }
   
-  // Display value exactly as stored in database - NO FORMATTING
+  // Format value using centralized formatting utility
   const formatValue = (metric: string, value: number | null) => {
-    if (value === null || value === undefined) return '-'
-    
-    // Show exact value from database
-    return value.toString()
+    return formatMetricValue(metric, value)
   }
   
   // Check if this is SEO data (includes local seo or organic seo)
