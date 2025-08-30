@@ -75,21 +75,15 @@ export function CompanySection({
         {keyMetrics.map((metric) => (
           <MetricCard
             key={metric.field_code}
-            company={companyName}
-            metricName={metric.display_name}
-            fieldCode={metric.field_code}
-            actual={metric.actual_value}
-            trending={metric.trending_value}
-            momPercent={metric.month_over_month_percent}
-            yoyPercent={metric.year_over_year_percent}
-            goal={metric.goal_value}
-            goalPercent={metric.goal_achievement_percent}
-            format={
+            title={metric.display_name}
+            value={metric.trending_value ?? null}
+            formatType={
               metric.format_type === 'currency' ? 'currency' :
               metric.format_type === 'percent' ? 'percent' :
-              metric.format_type === 'rating' ? 'rating' :
               'number'
             }
+            change={metric.month_over_month_percent ?? undefined}
+            changeType="percent"
           />
         ))}
       </div>
@@ -106,21 +100,16 @@ export function CompanySection({
                 {categoryMetrics.map((metric) => (
                   <MetricCard
                     key={metric.field_code}
-                    company={companyName}
-                    metricName={metric.display_name}
-                    fieldCode={metric.field_code}
-                    actual={metric.actual_value}
-                    trending={metric.trending_value}
-                    momPercent={metric.month_over_month_percent}
-                    yoyPercent={metric.year_over_year_percent}
-                    goal={metric.goal_value}
-                    goalPercent={metric.goal_achievement_percent}
-                    format={
+                    title={metric.display_name}
+                    value={metric.trending_value ?? null}
+                    formatType={
                       metric.format_type === 'currency' ? 'currency' :
                       metric.format_type === 'percent' ? 'percent' :
-                      metric.format_type === 'rating' ? 'rating' :
                       'number'
                     }
+                    change={metric.month_over_month_percent ?? undefined}
+                    changeType="percent"
+                    size="small"
                   />
                 ))}
               </div>

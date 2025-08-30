@@ -1,157 +1,179 @@
-'use client'
+'use client';
 
-import { ArrowUp, ArrowDown, Minus, Target } from 'lucide-react'
-import { formatCurrency, formatPercent, formatNumber, cn } from '@/lib/utils'
-
-interface MetricCardProps {
-  company: string
-  metricName: string
-  fieldCode: string
-  actual: number | null | undefined
-  trending: number | null | undefined
-  momPercent: number | null | undefined
-  yoyPercent: number | null | undefined
-  goal?: number | null | undefined
-  goalPercent?: number | null | undefined
-  format: 'currency' | 'number' | 'percent' | 'rating'
-  className?: string
-}
+import React from 'react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { MetricCardProps } from '@/types/dashboard';
+import { formatCurrency, formatNumber, formatPercent } from '@/lib/utils';
 
 export function MetricCard({
-  company,
-  metricName,
-  fieldCode,
-  actual,
-  trending,
-  momPercent,
-  yoyPercent,
-  goal,
-  goalPercent,
-  format,
-  className
+  title,
+  value,
+  formatType,
+  change,
+  changeType = 'percent',
+  trend,
+  subtitle,
+  isLoading = false,
+  size = 'medium',
+  showSparkline = false,
+  sparklineData = []
 }: MetricCardProps) {
   // Format the main value
-  const formatValue = (value: number | null | undefined): string => {
-    if (value === null || value === undefined) return 'N/A'
+  const formatValue = (val: number | null) => {
+    if (val === null || val === undefined) return 'N/A';
     
-    switch (format) {
+    switch (formatType) {
       case 'currency':
-        return formatCurrency(value)
+        return formatCurrency(val);
       case 'percent':
-        return formatPercent(value)
-      case 'rating':
-        return `${value.toFixed(1)}★`
+        return formatPercent(val);
+      case 'number':
+        return formatNumber(val);
       default:
-        return formatNumber(value)
+        return val.toString();
     }
-  }
+  };
 
-  // Get comparison icon and color
-  const getComparisonDisplay = (percent: number | null | undefined) => {
-    if (percent === null || percent === undefined) {
-      return { icon: <Minus className="h-3 w-3" />, color: 'text-gray-500', text: 'N/A' }
-    }
-
-    const absPercent = Math.abs(percent)
-    const text = absPercent > 1000 ? '>1000%' : `${absPercent.toFixed(2)}%`
-    
-    if (percent > 0) {
-      return { 
-        icon: <ArrowUp className="h-3 w-3" />, 
-        color: 'text-green-600',
-        text: `+${text}`
-      }
-    } else if (percent < 0) {
-      return { 
-        icon: <ArrowDown className="h-3 w-3" />, 
-        color: 'text-red-600',
-        text: `-${text}`
-      }
+  // Format the change value
+  const formatChange = (val: number) => {
+    if (changeType === 'percent') {
+      return `${val > 0 ? '+' : ''}${val.toFixed(1)}%`;
     } else {
-      return { 
-        icon: <Minus className="h-3 w-3" />, 
-        color: 'text-gray-500',
-        text: '0.00%'
-      }
+      return `${val > 0 ? '+' : ''}${formatValue(val)}`;
     }
+  };
+
+  // Determine trend colors and icons
+  const getTrendInfo = () => {
+    if (trend === 'up' || (change && change > 0)) {
+      return {
+        color: 'text-green-600',
+        bgColor: 'bg-green-50',
+        icon: TrendingUp
+      };
+    } else if (trend === 'down' || (change && change < 0)) {
+      return {
+        color: 'text-red-600',
+        bgColor: 'bg-red-50',
+        icon: TrendingDown
+      };
+    } else {
+      return {
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-50',
+        icon: Minus
+      };
+    }
+  };
+
+  const trendInfo = getTrendInfo();
+  const TrendIcon = trendInfo.icon;
+
+  // Size-based classes
+  const sizeClasses = {
+    small: {
+      card: 'p-4',
+      title: 'text-sm',
+      value: 'text-xl',
+      change: 'text-sm'
+    },
+    medium: {
+      card: 'p-6',
+      title: 'text-sm',
+      value: 'text-2xl',
+      change: 'text-sm'
+    },
+    large: {
+      card: 'p-8',
+      title: 'text-base',
+      value: 'text-3xl',
+      change: 'text-base'
+    }
+  };
+
+  const classes = sizeClasses[size];
+
+  if (isLoading) {
+    return (
+      <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${classes.card}`}>
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+        </div>
+      </div>
+    );
   }
-
-  const momDisplay = getComparisonDisplay(momPercent)
-  const yoyDisplay = getComparisonDisplay(yoyPercent)
-  const goalDisplay = goalPercent !== null && goalPercent !== undefined 
-    ? getComparisonDisplay(goalPercent - 100) // Goal is stored as achievement %, we want vs goal
-    : null
-
-  // Determine if this is net_sales (only metric with goal)
-  const showGoal = fieldCode === 'net_sales' && goal !== null && goal !== undefined
 
   return (
-    <div className={cn(
-      "bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4",
-      className
-    )}>
-      {/* Metric Name */}
-      <h4 className="text-sm font-medium text-gray-700 mb-3">{metricName}</h4>
-      
-      {/* Values Section */}
-      <div className="space-y-2 mb-3">
-        {/* Trending Value (Primary) */}
-        <div>
-          <div className="text-2xl font-bold text-gray-900">
-            {formatValue(trending)}
-          </div>
-          <div className="text-xs text-gray-500">Trending</div>
+    <div className={`bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow ${classes.card}`}>
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <p className={`font-medium text-gray-600 ${classes.title}`}>
+            {title}
+          </p>
+          <p className={`font-bold text-gray-900 mt-2 ${classes.value}`}>
+            {formatValue(value)}
+          </p>
+          
+          {subtitle && (
+            <p className="text-xs text-gray-500 mt-1">
+              {subtitle}
+            </p>
+          )}
         </div>
-        
-        {/* Actual Value (Secondary) */}
-        {actual !== trending && (
-          <div className="flex items-baseline gap-2">
-            <span className="text-sm text-gray-600">Actual:</span>
-            <span className="text-sm font-medium text-gray-700">
-              {formatValue(actual)}
-            </span>
-          </div>
-        )}
-      </div>
-      
-      {/* Comparisons */}
-      <div className="space-y-1.5 pt-3 border-t border-gray-100">
-        {/* MoM Comparison */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">vs Jun '25:</span>
-          <div className={cn("flex items-center gap-0.5", momDisplay.color)}>
-            {momDisplay.icon}
-            <span className="text-xs font-semibold">{momDisplay.text}</span>
-          </div>
-        </div>
-        
-        {/* YoY Comparison */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">vs Jul '24:</span>
-          <div className={cn("flex items-center gap-0.5", yoyDisplay.color)}>
-            {yoyDisplay.icon}
-            <span className="text-xs font-semibold">{yoyDisplay.text}</span>
-          </div>
-        </div>
-        
-        {/* Goal Comparison (only for net_sales) */}
-        {showGoal && goalDisplay && (
-          <div className="flex items-center justify-between pt-1 border-t border-gray-100">
-            <span className="text-xs text-gray-500">
-              <Target className="h-3 w-3 inline mr-1" />
-              Goal:
-            </span>
-            <div className="flex items-col gap-2">
-              <span className="text-xs text-gray-600">
-                {formatValue(goal)}
+
+        {/* Trend indicator */}
+        {(change !== undefined || trend) && (
+          <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${trendInfo.bgColor}`}>
+            <TrendIcon className={`w-3 h-3 ${trendInfo.color}`} />
+            {change !== undefined && (
+              <span className={`${classes.change} font-medium ${trendInfo.color}`}>
+                {formatChange(change)}
               </span>
-              <div className={cn("flex items-center gap-0.5", goalDisplay.color)}>
-                <span className="text-xs font-semibold">({goalDisplay.text})</span>
-              </div>
-            </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* Mini sparkline */}
+      {showSparkline && sparklineData.length > 0 && (
+        <div className="mt-4 h-8">
+          <MiniSparkline data={sparklineData} color={trendInfo.color} />
+        </div>
+      )}
     </div>
-  )
+  );
+}
+
+// Mini sparkline component
+function MiniSparkline({ data, color }: { data: number[]; color: string }) {
+  if (data.length < 2) return null;
+
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min;
+  
+  if (range === 0) return null;
+
+  const points = data.map((value, index) => {
+    const x = (index / (data.length - 1)) * 100;
+    const y = ((max - value) / range) * 100;
+    return `${x},${y}`;
+  }).join(' ');
+
+  return (
+    <div className="w-full h-full">
+      <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polyline
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          points={points}
+          className={color}
+          opacity="0.6"
+        />
+      </svg>
+    </div>
+  );
 }

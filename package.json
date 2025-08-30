@@ -32,6 +32,7 @@
     "recharts": "^3.1.0"
   },
   "devDependencies": {
+    "@supabase/mcp-server-supabase": "^0.5.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
