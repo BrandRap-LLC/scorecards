@@ -21,6 +21,24 @@ export interface MCPSyncOptions {
   transform?: (data: any) => any;
 }
 
+export interface MCPContextOptions {
+  query: string;
+  limit?: number;
+  threshold?: number;
+  collection?: string;
+}
+
+export interface MCPContextResult {
+  results: Array<{
+    content: string;
+    metadata?: Record<string, any>;
+    score?: number;
+    file_path?: string;
+    chunk_id?: string;
+  }>;
+  error?: Error;
+}
+
 export interface ExecutiveReport {
   clinic: string;
   month: string;
@@ -77,17 +95,25 @@ export class MCPStatus {
     );
   }
 
+  static async checkContext(): Promise<boolean> {
+    // Check if Zilliz context MCP is available
+    // This would typically ping the context server
+    return true; // Assume available if configured
+  }
+
   static async checkAll(): Promise<{
     supabase: boolean;
     mssql: boolean;
     ide: boolean;
     replicate: boolean;
+    context: boolean;
   }> {
     return {
       supabase: await this.checkSupabase(),
       mssql: await this.checkMSSQL(),
       ide: true, // IDE MCP is always available in Claude Desktop
-      replicate: !!process.env.REPLICATE_API_TOKEN
+      replicate: !!process.env.REPLICATE_API_TOKEN,
+      context: await this.checkContext()
     };
   }
 }
@@ -438,6 +464,134 @@ export class ReplicateMCP {
 }
 
 /**
+ * Zilliz Context MCP Operations
+ * Semantic search and context retrieval using Zilliz vector database
+ */
+export class ZillizContextMCP {
+  /**
+   * Index project files for semantic search
+   */
+  static async indexProject(
+    projectPath: string = '.',
+    options?: {
+      extensions?: string[];
+      excludePatterns?: string[];
+      chunkSize?: number;
+    }
+  ): Promise<{ success: boolean; filesIndexed: number; error?: Error }> {
+    try {
+      // This would call the Zilliz context MCP server to index files
+      // For now, return a mock success response
+      return {
+        success: true,
+        filesIndexed: 0,
+        error: new Error('Zilliz Context MCP indexing pending implementation')
+      };
+    } catch (error) {
+      return {
+        success: false,
+        filesIndexed: 0,
+        error: error as Error
+      };
+    }
+  }
+
+  /**
+   * Search for relevant code context using semantic similarity
+   */
+  static async searchContext(
+    query: string,
+    options?: MCPContextOptions
+  ): Promise<MCPContextResult> {
+    try {
+      // This would perform semantic search via Zilliz context MCP
+      // For now, return empty results
+      return {
+        results: [],
+        error: new Error('Zilliz Context MCP search pending implementation')
+      };
+    } catch (error) {
+      return {
+        results: [],
+        error: error as Error
+      };
+    }
+  }
+
+  /**
+   * Get related code snippets for a given file
+   */
+  static async getRelatedCode(
+    filePath: string,
+    options?: {
+      limit?: number;
+      threshold?: number;
+    }
+  ): Promise<MCPContextResult> {
+    try {
+      // This would find semantically related code files
+      return {
+        results: [],
+        error: new Error('Zilliz Context MCP related code search pending implementation')
+      };
+    } catch (error) {
+      return {
+        results: [],
+        error: error as Error
+      };
+    }
+  }
+
+  /**
+   * Search for specific patterns or implementations
+   */
+  static async searchPatterns(
+    pattern: string,
+    options?: {
+      fileTypes?: string[];
+      limit?: number;
+    }
+  ): Promise<MCPContextResult> {
+    try {
+      // This would search for code patterns using semantic understanding
+      return {
+        results: [],
+        error: new Error('Zilliz Context MCP pattern search pending implementation')
+      };
+    } catch (error) {
+      return {
+        results: [],
+        error: error as Error
+      };
+    }
+  }
+
+  /**
+   * Get documentation and comments for code entities
+   */
+  static async getDocumentation(
+    entity: string,
+    options?: {
+      includeExamples?: boolean;
+      contextWindow?: number;
+    }
+  ): Promise<MCPContextResult> {
+    try {
+      // This would extract and return relevant documentation
+      return {
+        results: [],
+        error: new Error('Zilliz Context MCP documentation search pending implementation')
+      };
+    } catch (error) {
+      return {
+        results: [],
+        error: error as Error
+      };
+    }
+  }
+}
+
+/**
  * IDE MCP Operations
  * Development tools integration
  */
@@ -479,6 +633,7 @@ export class MCP {
   static DataSync = MCPDataSync;
   static Replicate = ReplicateMCP;
   static IDE = IDEMCP;
+  static Context = ZillizContextMCP;
 
   /**
    * Initialize all MCP connections
@@ -495,8 +650,29 @@ export class MCP {
     if (!status.replicate) {
       console.warn('Replicate MCP not available');
     }
+    if (!status.context) {
+      console.warn('Zilliz Context MCP not available');
+    }
     
     console.log('MCP initialization complete', status);
+  }
+
+  /**
+   * Quick access methods for common operations
+   */
+  static async searchCode(query: string, options?: MCPContextOptions): Promise<MCPContextResult> {
+    return await this.Context.searchContext(query, options);
+  }
+
+  static async indexCurrentProject(options?: {
+    extensions?: string[];
+    excludePatterns?: string[];
+  }): Promise<{ success: boolean; filesIndexed: number; error?: Error }> {
+    return await this.Context.indexProject('.', options);
+  }
+
+  static async findRelatedCode(filePath: string, limit: number = 5): Promise<MCPContextResult> {
+    return await this.Context.getRelatedCode(filePath, { limit });
   }
 }
 

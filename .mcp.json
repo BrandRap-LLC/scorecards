@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "claude-context": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@zilliz/claude-context-mcp@latest"
+      ],
+      "env": {
+        "OPENAI_API_KEY": "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",
+        "MILVUS_TOKEN": "cf8126aedd481149eba5e64fb222e8f179e4dfb89f5c1794dee12a3bd3c716a61c86c9b7fd8d8beda6ce2da23fa4e6903b5e22c6"
+      }
+    }
+  }
+}
